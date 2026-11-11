@@ -8,13 +8,16 @@ export const MAIN_LINKS: NavLink[] = [
 
 export const CUSTOM_ORDER_LINK: NavLink = { label: "Custom Order", href: "/custom-order" };
 
-// sementara statis, nanti diganti useQuery kategori dari BE
+// 7 kategori dari PRD §4.1, param URL mengikuti PRD §6.2 (?kategori=bloom-box)
+// sementara statis, nanti diganti useQuery kategori dari BE (kategori dikelola admin)
 export const CATEGORY_LINKS: NavLink[] = [
-  { label: "Buket Bunga", href: "/products?category=buket-bunga" },
-  { label: "Hampers", href: "/products?category=hampers" },
-  { label: "Anggrek", href: "/products?category=anggrek" },
-  { label: "Bunga Papan", href: "/products?category=bunga-papan" },
-  { label: "Standing Flower", href: "/products?category=standing-flower" },
+  { label: "Round Bouquet", href: "/products?kategori=round-bouquet" },
+  { label: "Bloom Box", href: "/products?kategori=bloom-box" },
+  { label: "Flower Frame", href: "/products?kategori=flower-frame" },
+  { label: "Flower Canvas", href: "/products?kategori=flower-canvas" },
+  { label: "Hand Bouquet", href: "/products?kategori=hand-bouquet" },
+  { label: "Mini Museum", href: "/products?kategori=mini-museum" },
+  { label: "Keychain", href: "/products?kategori=keychain" },
 ];
 
 // "/" hanya aktif di beranda, menu lain aktif juga di sub-halamannya

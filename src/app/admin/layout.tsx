@@ -1,4 +1,4 @@
-// layout dashboard admin (belum ada desain Figma), URL diawali /admin
+// layout panel admin (role ADMIN dicek di server/middleware), sidebar menyusul (PRD §12)
 export default function AdminLayout({
   children,
 }: {
