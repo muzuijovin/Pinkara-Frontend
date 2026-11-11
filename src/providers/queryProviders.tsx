@@ -1,0 +1,24 @@
+"use client";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState, type ReactNode } from "react";
+
+export default function QueryProvider({ children }: { children: ReactNode }) {
+  // dibuat di dalam useState supaya tiap user/request punya QueryClient sendiri
+  // (kalau di luar komponen, cache bisa kebagi antar user saat SSR)
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000,
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}

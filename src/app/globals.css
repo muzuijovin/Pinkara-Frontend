@@ -1,26 +1,104 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&display=swap");
+
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@plugin "daisyui" {
+  themes: false;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@plugin "daisyui/theme" {
+  name: "pinkara";
+  default: true;
+  color-scheme: light;
+
+  /* palet utama Pinkara Florist */
+  --color-primary: #c41d7f;
+  --color-primary-content: #ffffff;
+  --color-secondary: #eb2f96;
+  --color-secondary-content: #ffffff;
+  --color-accent: #1677ff;
+  --color-accent-content: #ffffff;
+  --color-neutral: #000000;
+  --color-neutral-content: #ffffff;
+
+  /* permukaan */
+  --color-base-100: #ffffff;
+  --color-base-200: #f3f3f3;
+  --color-base-300: #e2e2e2;
+  --color-base-content: #1a1c1c;
+
+  /* status */
+  --color-info: #1677ff;
+  --color-info-content: #ffffff;
+  --color-success: #2e7d32;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #1a1c1c;
+  --color-error: #c62828;
+  --color-error-content: #ffffff;
+
+  /* bentuk (mengikuti mockup: sudut sedikit membulat) */
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.75rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --color-tertiary: #1677ff;
+  --color-tertiary-content: #ffffff;
+  --font-sans: "Noto Sans", sans-serif;
+
+  /* skala warna (shade 50–950) sesuai swatch di design system */
+  --color-pink-brand-50: #fdf0f7;
+  --color-pink-brand-100: #fbd9eb;
+  --color-pink-brand-200: #f5aed4;
+  --color-pink-brand-300: #ec7bb8;
+  --color-pink-brand-400: #dc4a9b;
+  --color-pink-brand-500: #c41d7f; /* primary */
+  --color-pink-brand-600: #a3166a;
+  --color-pink-brand-700: #821054;
+  --color-pink-brand-800: #5e0b3d;
+  --color-pink-brand-900: #3d0728;
+  --color-pink-brand-950: #220316;
+
+  --color-blue-brand-50: #eef5ff;
+  --color-blue-brand-100: #d6e6ff;
+  --color-blue-brand-200: #a8caff;
+  --color-blue-brand-300: #6fa6ff;
+  --color-blue-brand-400: #3d8bff;
+  --color-blue-brand-500: #1677ff; /* tertiary */
+  --color-blue-brand-600: #0b5ed7;
+  --color-blue-brand-700: #0848a8;
+  --color-blue-brand-800: #06347a;
+  --color-blue-brand-900: #04214d;
+  --color-blue-brand-950: #021229;
+
+  /* token semantik halaman publik.
+     Pasangan teks di bawah lolos kontras WCAG AA 4.5:1 di atas putih / surface */
+  --color-ink: #1a1c1c; /* teks utama / headline */
+  --color-ink-muted: #5a4048; /* teks body & label (abu kemerahan seperti mockup) */
+  --color-accent-text: #a3166a; /* teks & badge pink (primary #c41d7f ~5.6:1, ini lebih aman di surface abu) */
+  --color-accent-soft: #fbd9eb; /* latar badge / highlight pink */
+  --color-page: #f9f9f9; /* latar halaman */
+  --color-surface-muted: #eeeeee; /* panel / kartu / input */
+  --color-surface-sunken: #e2e2e2; /* chip, tombol netral, track progress */
+  --color-line: #d4c2c8; /* border input (outlined) */
+  --color-inverted: #2f3131; /* tombol "Inverted" */
+  --color-inverted-content: #ffffff;
+  --color-success-text: #1b5e20;
+  --color-success-soft: #c8e6c9;
+  --color-danger-text: #ba1a1a;
+  --color-danger-soft: #ffdad6;
+  --color-info-soft: #d6e6ff;
+}
+
+html {
+  font-family: var(--font-sans);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-page);
+  color: var(--color-ink);
 }
