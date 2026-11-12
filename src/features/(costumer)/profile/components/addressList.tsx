@@ -101,7 +101,7 @@ export function AddressList() {
               <p className="mt-1 text-sm font-medium text-ink">
                 {address.recipientName} <span className="font-normal text-ink-muted">· {address.recipientPhone}</span>
               </p>
-              <p className="mt-1 break-words text-sm text-ink-muted">
+              <p className="mt-1 wrap-break-word text-sm text-ink-muted">
                 {address.fullAddress}, {address.city} {address.postalCode}
               </p>
 

@@ -20,7 +20,7 @@ export function ProfileSummary({ profile, addresses }: { profile: Profile; addre
       <div className="card-body gap-5 p-6">
         <AvatarUploader profile={profile}>
           <div className="text-center">
-            <p className="break-words text-lg font-semibold text-ink">{profile.name}</p>
+            <p className="wrap-break-word text-lg font-semibold text-ink">{profile.name}</p>
             <p className="break-all text-sm text-ink-muted">{profile.email}</p>
             {profile.role === "ADMIN" && (
               <span className="badge badge-sm mt-2 border-none bg-accent-soft text-accent-text">Admin</span>
