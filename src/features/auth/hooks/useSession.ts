@@ -15,6 +15,9 @@ export function useSession() {
       return res.data.data;
     },
     retry: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
+    // ambil ulang saat kembali ke tab ini: status verifikasi email / nama / foto yang diubah
+    // di tab atau perangkat lain langsung ikut terbaru (default QueryProvider mematikan ini)
+    refetchOnWindowFocus: true,
   });
 }

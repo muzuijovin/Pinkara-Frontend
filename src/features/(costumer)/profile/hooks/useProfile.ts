@@ -8,13 +8,33 @@ import { normalizePhone, type ProfileInput } from "@/features/validation/profile
 
 export const PROFILE_QUERY_KEY = ["users", "me"] as const;
 
+// salin data terbaru dari profil ke cache session (/auth/me) yang dipakai navbar & banner verifikasi email,
+// supaya tidak ada dua versi data user yang berbeda (mis. profil "Verified" tapi banner masih muncul)
+function syncSessionFromProfile(queryClient: QueryClient, profile: Profile) {
+  queryClient.setQueryData<User | null | undefined>(SESSION_QUERY_KEY, (session) =>
+    session
+      ? {
+          ...session,
+          name: profile.name,
+          phone: profile.phone,
+          avatarUrl: profile.avatarUrl,
+          emailVerifiedAt: profile.emailVerifiedAt,
+        }
+      : session,
+  );
+}
+
 // GET /users/me -> data profil lengkap (+ hasPassword / isGoogleLinked)
 export function useProfile() {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: PROFILE_QUERY_KEY,
     queryFn: async () => {
       const res = await axiosInstance.get<ApiResponse<Profile>>("/users/me");
-      return res.data.data;
+      const profile = res.data.data;
+      syncSessionFromProfile(queryClient, profile);
+      return profile;
     },
   });
 }
@@ -22,9 +42,7 @@ export function useProfile() {
 // profil berubah -> cache profil & session (navbar: nama + foto) ikut diperbarui tanpa fetch ulang
 function syncProfileCache(queryClient: QueryClient, profile: Profile) {
   queryClient.setQueryData(PROFILE_QUERY_KEY, profile);
-  queryClient.setQueryData<User | null | undefined>(SESSION_QUERY_KEY, (session) =>
-    session ? { ...session, name: profile.name, phone: profile.phone, avatarUrl: profile.avatarUrl } : session,
-  );
+  syncSessionFromProfile(queryClient, profile);
 }
 
 // PATCH /users/me { name, phone } -> phone kosong = dihapus
