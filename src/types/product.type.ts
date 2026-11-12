@@ -27,6 +27,39 @@ export type ProductCardItem = {
   totalStock: number | null; // null = produk CUSTOM (tidak pakai stok)
 };
 
+// add-on yang boleh dipasang ke produk (GET /products/:slug -> addons)
+export type ProductAddon = {
+  id: string;
+  name: string; // mis. "Kardus M", "Paper Bag", "Gift Card"
+  type: AddonType;
+  size: ProductSize | null; // hanya PACKAGING
+  price: number;
+  stock: number; // 0 = tampil abu-abu "Sold out"
+  imageUrl: string | null;
+};
+
+// GET /products/:slug (halaman detail produk)
+export type ProductDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  type: ProductType;
+  description: string; // HTML sederhana, sudah disanitasi BE
+  images: string[];
+  basePrice: number | null;
+  minPrice: number;
+  maxPrice: number;
+  isFeatured: boolean;
+  dimensions: string | null;
+  materials: string | null;
+  productionDays: number | null;
+  allowedAddonTypes: AddonType[];
+  category: { id: string; name: string; slug: string };
+  variants: { id: string; label: string; price: number; stock: number; packageSize: ProductSize | null }[];
+  addons: ProductAddon[];
+  relatedProducts: ProductCardItem[];
+};
+
 // 1 baris di GET /products/admin (daftar produk panel admin)
 export type AdminProductListItem = {
   id: string;
