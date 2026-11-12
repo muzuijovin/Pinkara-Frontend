@@ -45,6 +45,9 @@ export type OrderPayment = {
   paidAt: string | null;
 };
 
+// foto progres pesanan custom yang diunggah admin (PRD §8 no. 6)
+export type ProgressPhoto = { url: string; caption: string | null; uploadedAt: string };
+
 export type OrderLineAddon = {
   name: string;
   type: AddonType;
@@ -96,6 +99,7 @@ export type OrderDetail = {
   courier: string | null;
   trackingNo: string | null;
   buyerNote: string | null;
+  progressPhotos: ProgressPhoto[]; // khusus pesanan custom
   expiresAt: string;
   paidAt: string | null;
   createdAt: string;

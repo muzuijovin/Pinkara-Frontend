@@ -1,4 +1,7 @@
-export type NavLink = { label: string; href: string };
+import type { UserRole } from "@/types/auth.type";
+
+// match = awalan path yang membuat menu aktif (default: href)
+export type NavLink = { label: string; href: string; match?: string };
 
 // urutan menu mengikuti header Figma (1:1866)
 export const MAIN_LINKS: NavLink[] = [
@@ -8,9 +11,15 @@ export const MAIN_LINKS: NavLink[] = [
 
 export const CUSTOM_ORDER_LINK: NavLink = { label: "Custom Order", href: "/custom-order" };
 
+// admin tidak memesan custom -> menu ke panel admin (dashboard belum ada, jadi langsung ke Orders)
+export const ADMIN_PANEL_LINK: NavLink = { label: "Admin panel", href: "/admin/orders", match: "/admin" };
+
+// menu terakhir sesuai peran: tamu & customer -> Custom Order, admin -> Admin panel
+export const roleLink = (role?: UserRole) => (role === "ADMIN" ? ADMIN_PANEL_LINK : CUSTOM_ORDER_LINK);
+
 // "/" hanya aktif di beranda, menu lain aktif juga di sub-halamannya
-export const isLinkActive = (pathname: string, href: string) => {
-  const path = href.split("?")[0];
+export const isLinkActive = (pathname: string, href: string, match?: string) => {
+  const path = match ?? href.split("?")[0];
   return path === "/" ? pathname === "/" : pathname.startsWith(path);
 };
 

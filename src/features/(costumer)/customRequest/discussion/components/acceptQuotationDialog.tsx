@@ -1,0 +1,134 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { PaymentMethodSection } from "@/features/(costumer)/checkout/components/paymentMethodSection";
+import { ShippingSection } from "@/features/(costumer)/checkout/components/shippingSection";
+import { getCheckoutError } from "@/features/(costumer)/checkout/hooks/useCheckout";
+import { useAddresses } from "@/features/(costumer)/profile/hooks/useAddresses";
+import { useSession } from "@/features/auth/hooks/useSession";
+import { formatRupiah } from "@/lib/currency.lib";
+import { getErrorMessage } from "@/lib/error.lib";
+import type { CustomRequestDetail, Quotation } from "@/types/customRequest.type";
+import type { PaymentMethod, ShippingMethod } from "@/types/order.type";
+import { useAcceptQuotation } from "../../hooks/useCustomRequests";
+
+type AcceptQuotationDialogProps = {
+  request: CustomRequestDetail;
+  quotation: Quotation;
+  onClose: () => void;
+};
+
+// "Accept & pay" (PRD §8 no. 4): pilih pengiriman & metode bayar -> pesanan custom dibuat -> halaman bayar.
+// Versi penawaran yang dilihat pembeli ikut dikirim; kalau sudah berubah, BE menolak (PRD §13.7)
+export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuotationDialogProps) {
+  const router = useRouter();
+  const { data: user } = useSession();
+  const { data: addresses, isPending: isLoadingAddresses } = useAddresses();
+  const { mutate: accept, isPending } = useAcceptQuotation(request.code);
+  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("COURIER");
+  const [pickedAddressId, setPickedAddressId] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("QRIS");
+
+  const addressId =
+    (pickedAddressId && addresses?.some((a) => a.id === pickedAddressId) ? pickedAddressId : null) ??
+    (addresses?.find((a) => a.isDefault) ?? addresses?.[0])?.id ??
+    null;
+  const shippingFee = request.shippingOptions.find((option) => option.method === shippingMethod)?.fee ?? 0;
+  const total = quotation.total + shippingFee;
+
+  const disabledReason = !user?.emailVerifiedAt
+    ? "Please verify your email before paying."
+    : shippingMethod === "COURIER" && !addressId
+      ? "Add a delivery address first."
+      : undefined;
+
+  const submit = () =>
+    accept(
+      {
+        quotationId: quotation.id,
+        version: quotation.version,
+        shippingMethod,
+        addressId: shippingMethod === "COURIER" ? (addressId ?? undefined) : undefined,
+        paymentMethod,
+        expectedTotal: total,
+      },
+      {
+        onSuccess: (order) => {
+          toast.success("Quote accepted! Complete your payment to start production.");
+          router.push(`/orders/${order.code}/payment`);
+        },
+        onError: (error) => {
+          const failure = getCheckoutError(error) as { code?: string } | null;
+          toast.error(getErrorMessage(error, "Couldn't accept the quote. Please try again."));
+          if (failure?.code === "QUOTATION_CHANGED" || failure?.code === "QUOTATION_EXPIRED") onClose();
+        },
+      },
+    );
+
+  return (
+    <dialog
+      ref={(dialog) => {
+        if (dialog && !dialog.open) dialog.showModal();
+      }}
+      onClose={onClose}
+      aria-labelledby="accept-title"
+      className="modal modal-bottom sm:modal-middle"
+    >
+      <div className="modal-box flex max-h-[90dvh] max-w-2xl flex-col gap-4 bg-page p-0">
+        <header className="border-b border-base-300 bg-base-100 px-5 py-4">
+          <h3 id="accept-title" className="text-lg font-semibold text-ink">
+            Accept quote & pay
+          </h3>
+          <p className="text-sm text-ink-muted">Choose how you&apos;d like to receive it and how to pay.</p>
+        </header>
+
+        <div className="flex flex-col gap-4 overflow-y-auto px-5">
+          <ShippingSection
+            options={request.shippingOptions}
+            method={shippingMethod}
+            onMethodChange={setShippingMethod}
+            addresses={addresses}
+            isLoadingAddresses={isLoadingAddresses}
+            addressId={addressId}
+            onAddressChange={setPickedAddressId}
+          />
+          <PaymentMethodSection options={request.paymentOptions} method={paymentMethod} onChange={setPaymentMethod} />
+        </div>
+
+        <footer className="flex flex-col gap-3 border-t border-base-300 bg-base-100 px-5 py-4">
+          <dl className="flex flex-col gap-1 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-ink-muted">Quote</dt>
+              <dd className="tabular-nums text-ink">{formatRupiah(quotation.total)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-ink-muted">Shipping</dt>
+              <dd className="tabular-nums text-ink">{shippingFee ? formatRupiah(shippingFee) : "Free"}</dd>
+            </div>
+            <div className="flex justify-between text-base font-semibold">
+              <dt className="text-ink">Total</dt>
+              <dd className="tabular-nums text-accent-text">{formatRupiah(total)}</dd>
+            </div>
+          </dl>
+          {disabledReason && <p className="text-xs text-danger-text">{disabledReason}</p>}
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <form method="dialog">
+              <button disabled={isPending} className="btn btn-ghost h-11 w-full text-ink sm:w-auto">
+                Cancel
+              </button>
+            </form>
+            <button type="button" disabled={Boolean(disabledReason) || isPending} onClick={submit} className="btn btn-primary h-11">
+              {isPending && <span aria-hidden="true" className="loading loading-spinner loading-sm" />}
+              {isPending ? "Placing order..." : `Accept & pay ${formatRupiah(total)}`}
+            </button>
+          </div>
+        </footer>
+      </div>
+      <form method="dialog" className="modal-backdrop">
+        <button aria-label="Close">close</button>
+      </form>
+    </dialog>
+  );
+}

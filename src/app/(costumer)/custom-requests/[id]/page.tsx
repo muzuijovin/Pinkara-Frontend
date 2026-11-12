@@ -1,5 +1,18 @@
-// ruang diskusi custom + penawaran aktif (Setuju & Bayar) (PRD §8)
-// halaman belum dibuat, sementara kosong supaya build tidak gagal (page.tsx wajib export default)
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { PageLoader } from "@/components/ui/pageLoader";
+import { DiscussionRoom } from "@/features/(costumer)/customRequest/discussion/discussionRoom";
+
+export const metadata: Metadata = { title: "Custom Request | Pinkara Studio" };
+
+// ruang diskusi custom (PRD §8). [id] berisi kode request (CST-…), bukan id internal (PRD §14)
+// DiscussionRoom baca kode pakai useParams (route dinamis) -> perlu Suspense karena cacheComponents aktif
 export default function CustomRequestDetailPage() {
-  return null;
+  return (
+    <div className="bg-page">
+      <Suspense fallback={<PageLoader />}>
+        <DiscussionRoom />
+      </Suspense>
+    </div>
+  );
 }
