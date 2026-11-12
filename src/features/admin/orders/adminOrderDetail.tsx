@@ -13,6 +13,7 @@ import { getErrorMessage } from "@/lib/error.lib";
 import type { AdminOrderDetail as AdminOrderDetailData, PaymentStatus } from "@/types/order.type";
 import { OrderActions } from "./components/orderActions";
 import { PackingWorksheet } from "./components/packingWorksheet";
+import { ProgressPhotos } from "./components/progressPhotos";
 import { useAdminOrder } from "./hooks/useAdminOrders";
 
 const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
@@ -199,6 +200,7 @@ export function AdminOrderDetail() {
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-[1fr_360px]">
         <div className="flex min-w-0 flex-col gap-6">
           <PackingWorksheet order={order} />
+          <ProgressPhotos order={order} />
           <History order={order} />
         </div>
         <aside className="flex flex-col gap-6">

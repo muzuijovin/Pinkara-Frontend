@@ -1,5 +1,18 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { PageLoader } from "@/components/ui/pageLoader";
+import { BriefForm } from "@/features/(costumer)/customRequest/briefForm";
+
+export const metadata: Metadata = { title: "Custom Order Brief | Pinkara Studio" };
+
 // form brief custom (?product=slug): ukuran, warna, bunga, tulisan kartu, tanggal dibutuhkan, foto referensi maks 5 (PRD §6.3)
-// halaman belum dibuat, sementara kosong supaya build tidak gagal (page.tsx wajib export default)
+// BriefForm baca ?product= (useSearchParams) -> perlu Suspense karena cacheComponents aktif
 export default function NewCustomRequestPage() {
-  return null;
+  return (
+    <div className="bg-page">
+      <Suspense fallback={<PageLoader />}>
+        <BriefForm />
+      </Suspense>
+    </div>
+  );
 }

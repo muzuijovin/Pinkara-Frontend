@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { PiArrowLeft, PiGift, PiPackage, PiReceipt, PiShoppingBag, PiTruck } from "react-icons/pi";
 import { FormAlert } from "@/components/form/formAlert";
+import { ProgressPhotoGrid } from "@/components/ui/progressPhotoGrid";
 import { PageLoader } from "@/components/ui/pageLoader";
 import { formatDateTimeWIB } from "@/lib/datetime.lib";
 import { getErrorMessage } from "@/lib/error.lib";
@@ -187,6 +188,16 @@ export function OrderDetail() {
             </div>
           </section>
 
+          {order.progressPhotos.length > 0 && (
+            <section aria-labelledby="progress-title" className="card border border-base-300 bg-base-100">
+              <div className="card-body gap-4 p-5 sm:p-6">
+                <h2 id="progress-title" className="text-lg font-semibold text-ink">
+                  Progress photos
+                </h2>
+                <ProgressPhotoGrid photos={order.progressPhotos} />
+              </div>
+            </section>
+          )}
           <AddonDetails items={order.items} />
           <StatusTimeline history={order.statusHistory} />
         </div>

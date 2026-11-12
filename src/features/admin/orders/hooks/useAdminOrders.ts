@@ -89,3 +89,14 @@ export function usePackAddon(code: string) {
     return res.data.data;
   });
 }
+
+// POST /admin/orders/:code/progress-photos (multipart: photo + caption) -> khusus pesanan custom
+export function useAddProgressPhoto(code: string) {
+  return useAdminOrderAction(code, async ({ file, caption }: { file: File; caption: string }) => {
+    const formData = new FormData();
+    formData.append("photo", file);
+    if (caption.trim()) formData.append("caption", caption.trim());
+    const res = await axiosInstance.post<ApiResponse<AdminOrderDetail>>(`/admin/orders/${code}/progress-photos`, formData);
+    return res.data.data;
+  });
+}

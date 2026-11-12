@@ -12,6 +12,8 @@ export function useProductDetail(slug: string) {
       const res = await axiosInstance.get<ApiResponse<ProductDetail>>(`/products/${encodeURIComponent(slug)}`);
       return res.data.data;
     },
+    // form brief custom tanpa ?product= tidak perlu mengambil produk
+    enabled: Boolean(slug),
     // 404 = produk memang tidak ada, tidak perlu dicoba ulang
     retry: (failureCount, error) => !(isAxiosError(error) && error.response?.status === 404) && failureCount < 2,
   });
