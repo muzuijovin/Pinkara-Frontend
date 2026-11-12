@@ -29,6 +29,7 @@ const ACTION_LABEL: Record<string, string> = {
   status_change: "Status changed",
   stock_adjust: "Stock adjusted",
   progress_photo: "Progress photo",
+  payment_check: "Payment checked",
 };
 export const humanize = (key: string) =>
   key
