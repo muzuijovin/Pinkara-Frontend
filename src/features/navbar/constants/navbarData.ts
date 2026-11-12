@@ -11,8 +11,8 @@ export const MAIN_LINKS: NavLink[] = [
 
 export const CUSTOM_ORDER_LINK: NavLink = { label: "Custom Order", href: "/custom-order" };
 
-// admin tidak memesan custom -> menu ke panel admin (dashboard belum ada, jadi langsung ke Orders)
-export const ADMIN_PANEL_LINK: NavLink = { label: "Admin panel", href: "/admin/orders", match: "/admin" };
+// admin tidak memesan custom -> menu ke panel admin (dashboard)
+export const ADMIN_PANEL_LINK: NavLink = { label: "Admin panel", href: "/admin", match: "/admin" };
 
 // menu terakhir sesuai peran: tamu & customer -> Custom Order, admin -> Admin panel
 export const roleLink = (role?: UserRole) => (role === "ADMIN" ? ADMIN_PANEL_LINK : CUSTOM_ORDER_LINK);
