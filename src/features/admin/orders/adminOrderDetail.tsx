@@ -3,7 +3,7 @@
 import { isAxiosError } from "axios";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { PiCaretRight, PiReceipt } from "react-icons/pi";
+import { PiCaretRight, PiMapPin, PiReceipt } from "react-icons/pi";
 import { FormAlert } from "@/components/form/formAlert";
 import { PageLoader } from "@/components/ui/pageLoader";
 import { ORDER_STATUS, OrderStatusBadge } from "@/features/(costumer)/orders/constants/orderStatus";
@@ -63,6 +63,24 @@ function CustomerAndShipping({ order }: { order: AdminOrderDetailData }) {
             <br />
             {order.shipFullAddress}, {order.shipCity} {order.shipPostalCode}
           </p>
+        )}
+        {order.shipServiceName && (
+          <p className="mt-2 text-ink">
+            <span className="font-medium">{order.shipServiceName}</span>
+            {order.shipEta && <span className="text-ink-muted"> · estimated {order.shipEta.toLowerCase()}</span>}
+          </p>
+        )}
+        {order.shipLatitude !== null && order.shipLongitude !== null && (
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${order.shipLatitude},${order.shipLongitude}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-accent-text underline-offset-2 hover:underline"
+          >
+            <PiMapPin aria-hidden="true" size={14} />
+            Open pinned location in Google Maps
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
         )}
         {order.trackingNo && (
           <p className="mt-2 text-ink">

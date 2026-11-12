@@ -18,7 +18,8 @@ export type OrderStatus =
 // kode error checkout dari BE (response.data.data.code)
 // PRICE_CHANGED = total berubah (harga / promo), CART_CHANGED = stok / produk berubah,
 // CHECKOUT_BUSY = server sibuk (aman diulang dengan idempotency key yang sama)
-export type CheckoutErrorCode = "PRICE_CHANGED" | "CART_CHANGED" | "CART_EMPTY" | "ADDRESS_NOT_FOUND" | "CHECKOUT_BUSY";
+// SHIPPING_CHANGED = layanan kurir yang dipilih tidak tersedia lagi (tarif diambil ulang server)
+export type CheckoutErrorCode = "PRICE_CHANGED" | "CART_CHANGED" | "CART_EMPTY" | "ADDRESS_NOT_FOUND" | "CHECKOUT_BUSY" | "SHIPPING_CHANGED";
 
 export type PaymentStatus =
   | "PENDING"
@@ -96,6 +97,8 @@ export type OrderDetail = {
   shipFullAddress: string | null;
   shipCity: string | null;
   shipPostalCode: string | null;
+  shipServiceName: string | null; // layanan kurir pilihan pembeli, mis. "GoSend Instant"
+  shipEta: string | null; // perkiraan lama kirim, mis. "1 - 3 hours"
   courier: string | null;
   trackingNo: string | null;
   buyerNote: string | null;
@@ -152,6 +155,9 @@ export type AdminOrderStatusCounts = Partial<Record<OrderStatus, number>>;
 
 // GET /admin/orders/:code (+ semua aksi admin)
 export type AdminOrderDetail = Omit<OrderDetail, "serverTime" | "payment" | "items" | "statusHistory"> & {
+  shipCourierCode: string | null;
+  shipLatitude: number | null; // titik lokasi tujuan (buka di Google Maps saat memesan kurir)
+  shipLongitude: number | null;
   shippedAt: string | null;
   completedAt: string | null;
   cancelledAt: string | null;

@@ -29,6 +29,7 @@ export type PlaceOrderVariables = {
   idempotencyKey: string;
   shippingMethod: ShippingMethod;
   addressId?: string;
+  courier?: { courierCode: string; serviceCode: string }; // layanan kurir pilihan (wajib untuk kurir)
   paymentMethod: PaymentMethod;
   buyerNote?: string;
   expectedTotal: number; // total yang dilihat pembeli; beda dengan hitungan server -> PRICE_CHANGED

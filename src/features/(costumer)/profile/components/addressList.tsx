@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PiMapPinLine, PiPencilSimple, PiPlus, PiStar, PiTrash } from "react-icons/pi";
+import { PiMapPin, PiMapPinLine, PiPencilSimple, PiPlus, PiStar, PiTrash } from "react-icons/pi";
 import { toast } from "react-toastify";
 import { FormAlert } from "@/components/form/formAlert";
 import { getErrorMessage } from "@/lib/error.lib";
@@ -96,6 +96,15 @@ export function AddressList() {
                 {address.label && <span className="font-semibold text-ink">{address.label}</span>}
                 {address.isDefault && (
                   <span className="badge badge-sm border-none bg-primary text-primary-content">Default</span>
+                )}
+                {/* titik peta = kurir instan (GoSend / Grab) bisa dipilih saat checkout */}
+                {address.latitude !== null && address.longitude !== null ? (
+                  <span className="badge badge-sm gap-1 border-none bg-success-soft text-success-text">
+                    <PiMapPin aria-hidden="true" size={12} />
+                    Pinned
+                  </span>
+                ) : (
+                  <span className="badge badge-sm border-none bg-surface-sunken text-ink-muted">No map pin</span>
                 )}
               </div>
               <p className="mt-1 text-sm font-medium text-ink">

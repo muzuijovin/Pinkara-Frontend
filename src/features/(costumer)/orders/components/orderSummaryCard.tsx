@@ -99,6 +99,12 @@ export function OrderSummaryCard({ order }: { order: OrderDetail }) {
               {order.shipFullAddress}, {order.shipCity} {order.shipPostalCode}
             </p>
           )}
+          {order.shipServiceName && (
+            <p className="mt-2 text-ink">
+              <span className="font-medium">{order.shipServiceName}</span>
+              {order.shipEta && <span className="text-ink-muted"> · estimated {order.shipEta.toLowerCase()}</span>}
+            </p>
+          )}
           {order.buyerNote && <p className="mt-2 text-ink-muted wrap-break-word">Note: {order.buyerNote}</p>}
         </div>
       </div>

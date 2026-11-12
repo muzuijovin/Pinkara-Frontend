@@ -15,6 +15,8 @@ export type Address = {
   fullAddress: string;
   city: string;
   postalCode: string;
+  latitude: number | null; // titik lokasi (untuk kurir instan)
+  longitude: number | null;
   isDefault: boolean;
   createdAt: string;
   updatedAt: string;

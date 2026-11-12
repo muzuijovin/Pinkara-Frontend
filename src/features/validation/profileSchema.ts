@@ -46,6 +46,9 @@ export const addressSchema = z.object({
     .max(100, "City must be at most 100 characters"),
   postalCode: z.string().trim().regex(/^[0-9]{5}$/, "Postal code must be 5 digits"),
   isDefault: z.boolean(),
+  // titik lokasi dari peta (opsional), dipakai untuk tarif kurir instan
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;

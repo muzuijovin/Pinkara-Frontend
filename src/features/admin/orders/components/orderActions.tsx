@@ -10,6 +10,8 @@ import type { AdminOrderDetail } from "@/types/order.type";
 import { useCancelOrder, useRefundOrder, useUpdateOrderStatus, type UpdateStatusVariables } from "../hooks/useAdminOrders";
 
 const COURIERS = ["JNE", "J&T", "SiCepat", "AnterAja", "GoSend", "GrabExpress", "Own courier"];
+// kode kurir pilihan pembeli (Biteship) -> nama di daftar kurir, supaya form "dikirim" langsung terisi
+const COURIER_BY_CODE: Record<string, string> = { jne: "JNE", jnt: "J&T", sicepat: "SiCepat", anteraja: "AnterAja", gojek: "GoSend", grab: "GrabExpress", pinkara: "Own courier" };
 
 function actionLabel(status: UpdateStatusVariables["status"], order: AdminOrderDetail) {
   switch (status) {
@@ -171,7 +173,7 @@ function RefundDialog({ order, onClose }: { order: AdminOrderDetail; onClose: ()
 // aksi penjual sesuai state machine (tombol hanya untuk transisi yang diizinkan BE)
 export function OrderActions({ order }: { order: AdminOrderDetail }) {
   const { mutate: updateStatus, isPending, variables } = useUpdateOrderStatus(order.code);
-  const [courier, setCourier] = useState(order.courier ?? COURIERS[0]);
+  const [courier, setCourier] = useState(order.courier ?? COURIER_BY_CODE[order.shipCourierCode ?? ""] ?? COURIERS[0]);
   const [trackingNo, setTrackingNo] = useState("");
   const [dialog, setDialog] = useState<"cancel" | "refund" | null>(null);
 

@@ -8,7 +8,7 @@ import { OptionCard } from "./optionCard";
 const SHIPPING_COPY: Record<ShippingMethod, { title: string; description: string; icon: React.ReactNode }> = {
   COURIER: {
     title: "Delivery",
-    description: "Delivered to your address by our courier.",
+    description: "Same-day couriers (GoSend, Grab) or regular shipping.",
     icon: <PiTruck size={20} />,
   },
   PICKUP: {
@@ -27,6 +27,8 @@ type ShippingSectionProps = {
   addressId: string | null;
   onAddressChange: (id: string) => void;
   addressError?: string;
+  courierFee: number | null; // ongkir layanan kurir terpilih (null = belum ada pilihan)
+  children?: React.ReactNode; // pilihan layanan kurir, tampil setelah alamat
 };
 
 // metode kirim + alamat tujuan (PRD §7 no. 2). Alamat dikelola di Profil -> Addresses
@@ -39,6 +41,8 @@ export function ShippingSection({
   addressId,
   onAddressChange,
   addressError,
+  courierFee,
+  children,
 }: ShippingSectionProps) {
   return (
     <section aria-labelledby="shipping-title" className="card border border-base-300 bg-base-100">
@@ -59,7 +63,7 @@ export function ShippingSection({
               icon={SHIPPING_COPY[option].icon}
               title={SHIPPING_COPY[option].title}
               description={SHIPPING_COPY[option].description}
-              aside={fee ? formatRupiah(fee) : "Free"}
+              aside={option === "COURIER" ? (courierFee !== null ? formatRupiah(courierFee) : undefined) : fee ? formatRupiah(fee) : "Free"}
             />
           ))}
         </fieldset>
@@ -117,6 +121,8 @@ export function ShippingSection({
             )}
           </fieldset>
         )}
+
+        {method === "COURIER" && children}
       </div>
     </section>
   );
