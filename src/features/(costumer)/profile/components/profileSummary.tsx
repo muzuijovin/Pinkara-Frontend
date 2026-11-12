@@ -53,7 +53,7 @@ export function ProfileSummary({ profile, addresses }: { profile: Profile; addre
                   ) : (
                     <PiCircle aria-hidden="true" size={18} className="shrink-0 text-ink-muted" />
                   )}
-                  <span className={`flex-1 ${item.done ? "text-ink-muted line-through" : "text-ink"}`}>
+                  <span className={`flex-1 ${item.done ? "text-ink-muted" : "text-ink"}`}>
                     {item.label}
                   </span>
                   <span className="sr-only">{item.done ? "(done)" : "(to do)"}</span>
