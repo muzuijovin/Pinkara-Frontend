@@ -33,8 +33,8 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Catalog",
     items: [
       { label: "Products", href: "/admin/products", icon: PiFlowerTulip, ready: true },
-      { label: "Categories", href: "/admin/categories", icon: PiSquaresFour, ready: false },
-      { label: "Add-ons", href: "/admin/addons", icon: PiGift, ready: false },
+      { label: "Categories", href: "/admin/categories", icon: PiSquaresFour, ready: true },
+      { label: "Add-ons", href: "/admin/addons", icon: PiGift, ready: true },
       { label: "Gallery", href: "/admin/gallery", icon: PiImages, ready: false },
     ],
   },
