@@ -13,6 +13,20 @@ export type ProductVariant = {
   sortOrder: number;
 };
 
+// 1 kartu di GET /products (katalog publik, landing, produk terkait)
+export type ProductCardItem = {
+  id: string;
+  name: string;
+  slug: string;
+  type: ProductType;
+  images: string[];
+  minPrice: number;
+  maxPrice: number;
+  isFeatured: boolean;
+  category: { name: string; slug: string };
+  totalStock: number | null; // null = produk CUSTOM (tidak pakai stok)
+};
+
 // 1 baris di GET /products/admin (daftar produk panel admin)
 export type AdminProductListItem = {
   id: string;
