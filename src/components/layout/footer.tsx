@@ -47,7 +47,7 @@ export default function Footer() {
         <aside className="max-w-xs">
           <BrandLogo showTagline={false} />
           <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-            An artisan boutique floral studio in Jakarta. Freshly curated flower arrangements, premium
+            An artisan boutique floral studio in Malang, East Java. Freshly curated flower arrangements, premium
             gift hampers, and luxury floral installations for every special moment.
           </p>
           <div className="mt-2 flex flex-wrap gap-2">

@@ -56,7 +56,7 @@ export function ProductSummary({ product, selectedVariant }: ProductSummaryProps
             </>
           ) : (
             <>
-              <strong>Same-day delivery</strong> across Jabodetabek for orders paid before 3:00 PM WIB.
+              <strong>Same-day delivery</strong> across Greater Malang (Malang, Batu &amp; Malang Regency) for orders paid before 3:00 PM WIB.
             </>
           )}
         </p>

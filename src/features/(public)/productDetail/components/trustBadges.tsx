@@ -2,7 +2,7 @@ import { PiCreditCard, PiSealCheck, PiTruck } from "react-icons/pi";
 
 const BADGES = [
   { icon: PiSealCheck, title: "Fresh guarantee", text: "Picked daily" },
-  { icon: PiTruck, title: "Same-day delivery", text: "Jabodetabek" },
+  { icon: PiTruck, title: "Same-day delivery", text: "Greater Malang" },
   { icon: PiCreditCard, title: "Easy payment", text: "QRIS & bank transfer" },
 ];
 
