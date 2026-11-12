@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  // foto dari luar yang boleh dipakai next/image:
+  // Cloudinary (upload produk & foto profil) dan Google (foto profil akun login Google)
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {

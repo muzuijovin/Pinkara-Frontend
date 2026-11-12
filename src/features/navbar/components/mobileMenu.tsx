@@ -4,13 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { PiList } from "react-icons/pi";
-import {
-  CATEGORY_LINKS,
-  CUSTOM_ORDER_LINK,
-  MAIN_LINKS,
-  closeDropdown,
-  isLinkActive,
-} from "../constants/navbarData";
+import { CUSTOM_ORDER_LINK, MAIN_LINKS, closeDropdown, isLinkActive } from "../constants/navbarData";
+import { CategoryMenuItems } from "./categoryMenuItems";
 import { SearchBar } from "./searchBar";
 
 // menu hamburger (< lg). children = bagian akun, beda untuk tamu & user login
@@ -23,7 +18,7 @@ export function MobileMenu({ children }: { children?: ReactNode }) {
       <div
         tabIndex={0}
         role="button"
-        aria-label="Buka menu navigasi"
+        aria-label="Open navigation menu"
         aria-haspopup="menu"
         className="btn btn-ghost btn-square size-11 text-ink"
       >
@@ -46,7 +41,7 @@ export function MobileMenu({ children }: { children?: ReactNode }) {
                   href={link.href}
                   onClick={closeDropdown}
                   aria-current={active ? "page" : undefined}
-                  className={`py-3 ${active ? "font-semibold text-primary" : "text-ink"}`}
+                  className={`border-l-2 py-3 text-ink ${active ? "border-primary font-semibold" : "border-transparent"}`}
                 >
                   {link.label}
                 </Link>
@@ -55,16 +50,10 @@ export function MobileMenu({ children }: { children?: ReactNode }) {
           })}
           <li>
             <span className="menu-title px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-              Kategori Bunga
+              Categories
             </span>
             <ul>
-              {CATEGORY_LINKS.map((category) => (
-                <li key={category.href}>
-                  <Link href={category.href} onClick={closeDropdown} className="py-2.5 text-ink">
-                    {category.label}
-                  </Link>
-                </li>
-              ))}
+              <CategoryMenuItems />
             </ul>
           </li>
         </ul>

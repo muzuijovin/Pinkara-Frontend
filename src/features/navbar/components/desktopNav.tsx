@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CUSTOM_ORDER_LINK, MAIN_LINKS, isLinkActive, type NavLink } from "../constants/navbarData";
+import {
+  CUSTOM_ORDER_LINK,
+  MAIN_LINKS,
+  isLinkActive,
+  navItemClass,
+  type NavLink,
+} from "../constants/navbarData";
 import { CategoryDropdown } from "./categoryDropdown";
 
-// menu tengah (desktop >= lg). Menu aktif: teks primary + garis bawah seperti Figma
+// menu tengah (desktop >= lg). Menu aktif: cukup garis primary di bawah, warna teks tetap
 export function DesktopNav() {
   const pathname = usePathname();
 
@@ -16,11 +22,7 @@ export function DesktopNav() {
         <Link
           href={href}
           aria-current={active ? "page" : undefined}
-          className={`btn btn-ghost relative h-11 px-3 text-[15px] font-medium hover:bg-transparent hover:text-primary ${
-            active
-              ? "text-primary after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:rounded-full after:bg-primary"
-              : "text-ink"
-          }`}
+          className={navItemClass(active)}
         >
           {label}
         </Link>
