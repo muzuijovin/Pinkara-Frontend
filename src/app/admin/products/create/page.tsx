@@ -1,5 +1,9 @@
-// tambah produk
-// halaman belum dibuat, sementara kosong supaya build tidak gagal (page.tsx wajib export default)
+import type { Metadata } from "next";
+import { ProductForm } from "@/features/admin/products/productForm";
+
+export const metadata: Metadata = { title: "Add Product | Pinkara Admin" };
+
+// upload produk baru (PRD §12.1b). Akses ADMIN dijaga RequireAuth di admin/layout.tsx
 export default function AdminCreateProductPage() {
-  return null;
+  return <ProductForm />;
 }

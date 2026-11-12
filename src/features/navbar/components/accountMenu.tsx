@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { IconType } from "react-icons";
-import { PiCaretDown, PiChatsCircle, PiGauge, PiPackage, PiSignOut, PiUser } from "react-icons/pi";
+import { PiCaretDown, PiChatsCircle, PiFlowerTulip, PiGauge, PiPackage, PiSignOut, PiUser } from "react-icons/pi";
 import { UserAvatar } from "@/components/ui/userAvatar";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import type { User, UserRole } from "@/types/auth.type";
@@ -19,6 +19,7 @@ const ACCOUNT_LINKS: Record<UserRole, AccountLink[]> = {
   ],
   ADMIN: [
     { label: "Admin Dashboard", href: "/admin", icon: PiGauge },
+    { label: "Products", href: "/admin/products", icon: PiFlowerTulip },
     { label: "My Profile", href: "/profile", icon: PiUser },
   ],
 };
