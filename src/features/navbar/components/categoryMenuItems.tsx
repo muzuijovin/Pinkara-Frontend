@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { categoryHref, useCategories } from "@/features/categories/hooks/useCategories";
-import { closeDropdown } from "../constants/navbarData";
 
 // isi menu kategori dari BE, dipakai di dropdown desktop & menu mobile (<li> di dalam .menu daisyUI)
 export function CategoryMenuItems() {
@@ -41,7 +40,6 @@ export function CategoryMenuItems() {
     <li key={category.id}>
       <Link
         href={categoryHref(category.slug)}
-        onClick={closeDropdown}
         className="flex items-center justify-between gap-3 py-2.5 text-sm text-ink"
       >
         {category.name}

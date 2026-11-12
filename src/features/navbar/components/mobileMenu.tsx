@@ -2,64 +2,77 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
-import { PiList } from "react-icons/pi";
-import { CUSTOM_ORDER_LINK, MAIN_LINKS, closeDropdown, isLinkActive } from "../constants/navbarData";
+import { useId, type ReactNode } from "react";
+import { PiList, PiX } from "react-icons/pi";
+import { CUSTOM_ORDER_LINK, MAIN_LINKS, isLinkActive } from "../constants/navbarData";
+import { useDropdown } from "../hooks/useDropdown";
 import { CategoryMenuItems } from "./categoryMenuItems";
 import { SearchBar } from "./searchBar";
 
-// menu hamburger (< lg). children = bagian akun, beda untuk tamu & user login
+// menu hamburger (< lg). children = bagian akun, beda untuk tamu & user login.
+// Buka/tutup pakai state (lihat useDropdown) supaya tombol & link di dalamnya bisa disentuh di HP
 export function MobileMenu({ children }: { children?: ReactNode }) {
   const pathname = usePathname();
+  const panelId = useId();
+  const { isOpen, close, toggle, containerProps } = useDropdown();
   const links = [...MAIN_LINKS, CUSTOM_ORDER_LINK];
 
   return (
-    <div className="dropdown lg:hidden">
-      <div
-        tabIndex={0}
-        role="button"
-        aria-label="Open navigation menu"
-        aria-haspopup="menu"
+    <div className="relative lg:hidden" {...containerProps}>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
         className="btn btn-ghost btn-square size-11 text-ink"
       >
-        <PiList aria-hidden="true" size={24} />
-      </div>
+        {isOpen ? <PiX aria-hidden="true" size={24} /> : <PiList aria-hidden="true" size={24} />}
+      </button>
 
-      <div
-        tabIndex={-1}
-        className="dropdown-content z-50 mt-3 w-[calc(100vw-2rem)] max-w-sm rounded-box border border-base-300 bg-base-100 p-4 shadow-lg"
-      >
-        {/* search di header disembunyikan di bawah md, jadi dipindah ke sini */}
-        <SearchBar className="md:hidden" />
+      {isOpen && (
+        <>
+          {/* lapisan transparan: sentuh di luar panel -> menu tertutup */}
+          <div aria-hidden="true" onClick={close} className="fixed inset-0 z-40" />
 
-        <ul className="menu mt-2 w-full p-0 text-[15px]">
-          {links.map((link) => {
-            const active = isLinkActive(pathname, link.href);
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  onClick={closeDropdown}
-                  aria-current={active ? "page" : undefined}
-                  className={`border-l-2 py-3 text-ink ${active ? "border-primary font-semibold" : "border-transparent"}`}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            );
-          })}
-          <li>
-            <span className="menu-title px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-              Categories
-            </span>
-            <ul>
-              <CategoryMenuItems />
-            </ul>
-          </li>
-        </ul>
+          <div
+            id={panelId}
+            className="absolute left-0 top-full z-50 mt-3 w-[calc(100vw-2rem)] max-w-sm rounded-box border border-base-300 bg-base-100 p-4 shadow-lg"
+          >
+            {/* search di header disembunyikan di bawah md, jadi dipindah ke sini */}
+            <SearchBar className="md:hidden" />
 
-        {children && <div className="mt-3 border-t border-base-300 pt-3">{children}</div>}
-      </div>
+            <nav aria-label="Mobile navigation">
+              <ul className="menu mt-2 w-full p-0 text-[15px]">
+                {links.map((link) => {
+                  const active = isLinkActive(pathname, link.href);
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        aria-current={active ? "page" : undefined}
+                        className={`border-l-2 py-3 text-ink ${active ? "border-primary font-semibold" : "border-transparent"}`}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+                <li>
+                  <span className="menu-title px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                    Categories
+                  </span>
+                  <ul>
+                    <CategoryMenuItems />
+                  </ul>
+                </li>
+              </ul>
+            </nav>
+
+            {children && <div className="mt-3 border-t border-base-300 pt-3">{children}</div>}
+          </div>
+        </>
+      )}
     </div>
   );
 }

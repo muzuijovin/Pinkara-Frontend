@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useId } from "react";
 import type { IconType } from "react-icons";
 import { PiCaretDown, PiChatsCircle, PiFlowerTulip, PiGauge, PiPackage, PiSignOut, PiUser } from "react-icons/pi";
 import { UserAvatar } from "@/components/ui/userAvatar";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import type { User, UserRole } from "@/types/auth.type";
-import { closeDropdown } from "../constants/navbarData";
+import { useDropdown } from "../hooks/useDropdown";
 
 type AccountLink = { label: string; href: string; icon: IconType };
 
@@ -24,15 +25,20 @@ const ACCOUNT_LINKS: Record<UserRole, AccountLink[]> = {
   ],
 };
 
+// buka/tutup pakai state (lihat useDropdown), bukan dropdown daisyUI berbasis focus,
+// supaya link & tombol Log out di dalamnya bisa disentuh di HP
 export function AccountMenu({ user }: { user: User }) {
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
+  const panelId = useId();
+  const { isOpen, close, toggle, containerProps } = useDropdown();
 
   return (
-    <div className="dropdown dropdown-end">
-      <div
-        tabIndex={0}
-        role="button"
-        aria-haspopup="menu"
+    <div className="relative" {...containerProps}>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={isOpen}
+        aria-controls={panelId}
         aria-label={`Account menu for ${user.name}`}
         className="flex h-11 cursor-pointer items-center gap-2.5 rounded-full py-1 pl-1 pr-2 transition-colors duration-200 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
@@ -40,47 +46,58 @@ export function AccountMenu({ user }: { user: User }) {
         <span aria-hidden="true" className="hidden max-w-32 truncate text-sm font-semibold text-ink md:block">
           {user.name}
         </span>
-        <PiCaretDown aria-hidden="true" size={14} className="hidden text-ink-muted md:block" />
-      </div>
+        <PiCaretDown
+          aria-hidden="true"
+          size={14}
+          className={`hidden text-ink-muted transition-transform duration-200 md:block ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
 
-      <div
-        tabIndex={-1}
-        className="dropdown-content z-50 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
-      >
-        <div className="px-3 pb-2 pt-1">
-          <p className="truncate text-sm font-semibold text-ink">{user.name}</p>
-          <p className="truncate text-xs text-ink-muted">{user.email}</p>
-          {user.role === "ADMIN" && (
-            <span className="badge badge-sm mt-1.5 border-none bg-accent-soft text-accent-text">Admin</span>
-          )}
-        </div>
+      {isOpen && (
+        <>
+          {/* lapisan transparan: sentuh di luar panel -> menu tertutup */}
+          <div aria-hidden="true" onClick={close} className="fixed inset-0 z-40" />
 
-        <ul className="menu w-full border-y border-base-300 p-0 py-1">
-          {ACCOUNT_LINKS[user.role].map(({ label, href, icon: Icon }) => (
-            <li key={href}>
-              <Link href={href} onClick={closeDropdown} className="py-2.5 text-sm text-ink">
-                <Icon aria-hidden="true" size={18} className="text-ink-muted" />
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+          <div
+            id={panelId}
+            className="absolute right-0 top-full z-50 mt-2 w-64 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
+          >
+            <div className="px-3 pb-2 pt-1">
+              <p className="truncate text-sm font-semibold text-ink">{user.name}</p>
+              <p className="truncate text-xs text-ink-muted">{user.email}</p>
+              {user.role === "ADMIN" && (
+                <span className="badge badge-sm mt-1.5 border-none bg-accent-soft text-accent-text">Admin</span>
+              )}
+            </div>
 
-        {/* logout dipisah dari menu biasa (aksi yang mengakhiri sesi) */}
-        <ul className="menu w-full p-0 pt-1">
-          <li>
-            <button
-              type="button"
-              disabled={isLoggingOut}
-              onClick={() => logout(undefined, { onSettled: closeDropdown })}
-              className="py-2.5 text-sm text-danger-text hover:bg-danger-soft disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <PiSignOut aria-hidden="true" size={18} />
-              {isLoggingOut ? "Logging out..." : "Log out"}
-            </button>
-          </li>
-        </ul>
-      </div>
+            <ul className="menu w-full border-y border-base-300 p-0 py-1">
+              {ACCOUNT_LINKS[user.role].map(({ label, href, icon: Icon }) => (
+                <li key={href}>
+                  <Link href={href} className="py-2.5 text-sm text-ink">
+                    <Icon aria-hidden="true" size={18} className="text-ink-muted" />
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {/* logout dipisah dari menu biasa (aksi yang mengakhiri sesi) */}
+            <ul className="menu w-full p-0 pt-1">
+              <li>
+                <button
+                  type="button"
+                  disabled={isLoggingOut}
+                  onClick={() => logout(undefined, { onSettled: close })}
+                  className="py-2.5 text-sm text-danger-text hover:bg-danger-soft disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <PiSignOut aria-hidden="true" size={18} />
+                  {isLoggingOut ? "Logging out..." : "Log out"}
+                </button>
+              </li>
+            </ul>
+          </div>
+        </>
+      )}
     </div>
   );
 }

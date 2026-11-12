@@ -21,7 +21,3 @@ export const navItemClass = (active: boolean) =>
     active ? "after:bg-primary" : "after:bg-transparent hover:after:bg-base-300"
   }`;
 
-// dropdown DaisyUI berbasis focus -> blur supaya menu tertutup setelah link diklik
-export const closeDropdown = () => {
-  (document.activeElement as HTMLElement | null)?.blur();
-};
