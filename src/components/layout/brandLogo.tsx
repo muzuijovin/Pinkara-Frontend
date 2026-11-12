@@ -1,25 +1,32 @@
 import Link from "next/link";
-import { PiFlowerTulipFill } from "react-icons/pi";
 
-// logo Pinkara, dipakai di navbar landing, navbar user, navbar auth & footer
+// logo Pinkara, dipakai di navbar landing, navbar user, navbar auth & footer.
+// Pakai versi kecil khusus (public/pinkara-mark-56/112/168.png): dipotong tepat di tepi cincin pink
+// (permintaan pemilik toko: cincin pink harus terlihat), sudah diperkecil
+// + dipertajam per ukuran layar (1x/2x/3x). Logo penuh resolusi tinggi ada di public/pinkara-logo.png
 export function BrandLogo({ showTagline = true }: { showTagline?: boolean }) {
   return (
     <Link
       href="/"
-      aria-label="Pinkara Florist Studio, go to homepage"
-      className="flex shrink-0 cursor-pointer items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+      aria-label="Pinkara Studio, go to homepage"
+      className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
     >
-      <span
-        aria-hidden="true"
-        className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-content"
-      >
-        <PiFlowerTulipFill size={22} />
-      </span>
-      <span aria-hidden="true" className="flex flex-col leading-none">
-        <span className="text-lg font-bold text-accent-text">Pinkara</span>
+      {/* <img> biasa (bukan next/image) supaya srcSet 1x/2x/3x hasil resize sendiri dipakai apa adanya */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/pinkara-mark-112.png"
+        srcSet="/pinkara-mark-56.png 1x, /pinkara-mark-112.png 2x, /pinkara-mark-168.png 3x"
+        alt=""
+        width={56}
+        height={56}
+        fetchPriority="high"
+        className="size-14 shrink-0 rounded-full"
+      />
+      <span aria-hidden="true" className="flex flex-col">
+        <span className="text-xl font-bold leading-6 text-accent-text">Pinkara</span>
         {showTagline && (
-          <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-muted">
-            Florist Studio
+          <span className="text-[10px] font-semibold uppercase leading-3 tracking-[0.3em] text-ink-muted">
+            Studio
           </span>
         )}
       </span>
