@@ -13,6 +13,8 @@ import { CheckoutSteps } from "@/components/ui/checkoutSteps";
 import { CART_QUERY_KEY } from "@/features/(costumer)/cart/hooks/useCart";
 import { ADDRESSES_QUERY_KEY, useAddresses } from "@/features/(costumer)/profile/hooks/useAddresses";
 import { ResendVerificationButton } from "@/features/auth/components/resendVerificationButton";
+import { CourierOptions, selectedOption } from "@/features/shipping/components/courierOptions";
+import { SHIPPING_RATES_KEY, useShippingRates } from "@/features/shipping/hooks/useShippingRates";
 import { SESSION_QUERY_KEY, useSession } from "@/features/auth/hooks/useSession";
 import { formatRupiah } from "@/lib/currency.lib";
 import { getErrorMessage } from "@/lib/error.lib";
@@ -70,6 +72,7 @@ export function CheckoutSection() {
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("COURIER");
   const [pickedAddressId, setPickedAddressId] = useState<string | null>(null);
+  const [pickedCourierId, setPickedCourierId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("QRIS");
   const [note, setNote] = useState("");
   // server menolak promo untuk pesanan ini (mis. kuota habis / nomor HP sudah pernah pakai)
@@ -77,6 +80,17 @@ export function CheckoutSection() {
   const [notice, setNotice] = useState<string>();
   const [addressError, setAddressError] = useState<string>();
 
+  // alamat terpilih: pilihan pembeli, kalau belum memilih -> alamat utama
+  const addressId =
+    (pickedAddressId && addresses?.some((address) => address.id === pickedAddressId) ? pickedAddressId : null) ??
+    (addresses?.find((address) => address.isDefault) ?? addresses?.[0])?.id ??
+    null;
+
+  // pilihan kurir (Biteship) untuk alamat terpilih
+  const shippingRates = useShippingRates({ addressId, enabled: shippingMethod === "COURIER" && Boolean(preview) });
+  const courier = shippingMethod === "COURIER" ? selectedOption(shippingRates.data, pickedCourierId) : null;
+
+  // admin tidak bisa checkout (dicek setelah semua hook dipanggil)
   if (user && user.role !== "CUSTOMER") {
     return (
       <div className="mx-auto w-full max-w-md px-4 py-16 text-center">
@@ -86,24 +100,22 @@ export function CheckoutSection() {
     );
   }
 
-  // alamat terpilih: pilihan pembeli, kalau belum memilih -> alamat utama
-  const addressId =
-    (pickedAddressId && addresses?.some((address) => address.id === pickedAddressId) ? pickedAddressId : null) ??
-    (addresses?.find((address) => address.isDefault) ?? addresses?.[0])?.id ??
-    null;
-
   const checkoutError = getCheckoutError(error);
   const isEmailVerified = Boolean(user?.emailVerifiedAt);
 
   const discount = preview?.promo && !promoDropped ? preview.promo.discount : 0;
-  const shippingFee = preview?.shippingOptions.find((option) => option.method === shippingMethod)?.fee ?? 0;
+  const shippingFee = shippingMethod === "COURIER" ? (courier?.fee ?? 0) : (preview?.shippingOptions.find((option) => option.method === shippingMethod)?.fee ?? 0);
   const total = preview ? preview.subtotal + preview.addonTotal - discount + shippingFee : 0;
 
   const disabledReason = !isEmailVerified
     ? "Verify your email to place an order."
     : shippingMethod === "COURIER" && !addressId
       ? "Add a delivery address first."
-      : undefined;
+      : shippingMethod === "COURIER" && !courier
+        ? shippingRates.isPending
+          ? "Loading delivery options..."
+          : "Choose a delivery option."
+        : undefined;
 
   const handlePlaceOrder = () => {
     if (!preview || disabledReason) return;
@@ -115,6 +127,7 @@ export function CheckoutSection() {
         idempotencyKey,
         shippingMethod,
         addressId: shippingMethod === "COURIER" ? (addressId ?? undefined) : undefined,
+        courier: courier ? { courierCode: courier.courierCode, serviceCode: courier.serviceCode } : undefined,
         paymentMethod,
         buyerNote: note.trim() || undefined,
         expectedTotal: total,
@@ -135,8 +148,14 @@ export function CheckoutSection() {
                 `Your total has changed${failure.total !== undefined ? ` to ${formatRupiah(failure.total)}` : ""}. Please review it and place your order again.`,
               );
               refetch();
+              queryClient.invalidateQueries({ queryKey: SHIPPING_RATES_KEY }); // ongkir bisa ikut berubah
               return;
             }
+            case "SHIPPING_CHANGED":
+              setNotice("Your delivery option is no longer available. Please choose another one.");
+              setPickedCourierId(null);
+              queryClient.invalidateQueries({ queryKey: SHIPPING_RATES_KEY });
+              return;
             case "CART_CHANGED":
             case "CART_EMPTY":
               toast.error(getErrorMessage(err));
@@ -212,7 +231,19 @@ export function CheckoutSection() {
                   setAddressError(undefined);
                 }}
                 addressError={addressError}
-              />
+                courierFee={courier?.fee ?? null}
+              >
+                {addressId && (
+                  <CourierOptions
+                    rates={shippingRates.data}
+                    isPending={shippingRates.isPending}
+                    error={shippingRates.error}
+                    onRetry={() => shippingRates.refetch()}
+                    selectedId={courier?.id ?? null}
+                    onChange={setPickedCourierId}
+                  />
+                )}
+              </ShippingSection>
 
               <PaymentMethodSection options={preview.paymentOptions} method={paymentMethod} onChange={setPaymentMethod} />
 

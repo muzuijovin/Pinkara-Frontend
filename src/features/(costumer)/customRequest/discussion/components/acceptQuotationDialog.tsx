@@ -12,6 +12,9 @@ import { formatRupiah } from "@/lib/currency.lib";
 import { getErrorMessage } from "@/lib/error.lib";
 import type { CustomRequestDetail, Quotation } from "@/types/customRequest.type";
 import type { PaymentMethod, ShippingMethod } from "@/types/order.type";
+import { CourierOptions, selectedOption } from "@/features/shipping/components/courierOptions";
+import { SHIPPING_RATES_KEY, useShippingRates } from "@/features/shipping/hooks/useShippingRates";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAcceptQuotation } from "../../hooks/useCustomRequests";
 
 type AcceptQuotationDialogProps = {
@@ -28,21 +31,30 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
   const { data: addresses, isPending: isLoadingAddresses } = useAddresses();
   const { mutate: accept, isPending } = useAcceptQuotation(request.code);
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("COURIER");
+  const queryClient = useQueryClient();
   const [pickedAddressId, setPickedAddressId] = useState<string | null>(null);
+  const [pickedCourierId, setPickedCourierId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("QRIS");
 
   const addressId =
     (pickedAddressId && addresses?.some((a) => a.id === pickedAddressId) ? pickedAddressId : null) ??
     (addresses?.find((a) => a.isDefault) ?? addresses?.[0])?.id ??
     null;
-  const shippingFee = request.shippingOptions.find((option) => option.method === shippingMethod)?.fee ?? 0;
+  // pilihan kurir dihitung dari isi penawaran (ukuran kardus) ke alamat terpilih
+  const shippingRates = useShippingRates({ addressId, quotationId: quotation.id, enabled: shippingMethod === "COURIER" });
+  const courier = shippingMethod === "COURIER" ? selectedOption(shippingRates.data, pickedCourierId) : null;
+  const shippingFee = shippingMethod === "COURIER" ? (courier?.fee ?? 0) : (request.shippingOptions.find((option) => option.method === shippingMethod)?.fee ?? 0);
   const total = quotation.total + shippingFee;
 
   const disabledReason = !user?.emailVerifiedAt
     ? "Please verify your email before paying."
     : shippingMethod === "COURIER" && !addressId
       ? "Add a delivery address first."
-      : undefined;
+      : shippingMethod === "COURIER" && !courier
+        ? shippingRates.isPending
+          ? "Loading delivery options..."
+          : "Choose a delivery option."
+        : undefined;
 
   const submit = () =>
     accept(
@@ -51,6 +63,7 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
         version: quotation.version,
         shippingMethod,
         addressId: shippingMethod === "COURIER" ? (addressId ?? undefined) : undefined,
+        courier: courier ? { courierCode: courier.courierCode, serviceCode: courier.serviceCode } : undefined,
         paymentMethod,
         expectedTotal: total,
       },
@@ -62,6 +75,11 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
         onError: (error) => {
           const failure = getCheckoutError(error) as { code?: string } | null;
           toast.error(getErrorMessage(error, "Couldn't accept the quote. Please try again."));
+          // ongkir berubah / layanan kurir tidak tersedia lagi -> ambil ulang pilihan kurir
+          if (failure?.code === "SHIPPING_CHANGED" || failure?.code === "PRICE_CHANGED") {
+            setPickedCourierId(null);
+            queryClient.invalidateQueries({ queryKey: SHIPPING_RATES_KEY });
+          }
           if (failure?.code === "QUOTATION_CHANGED" || failure?.code === "QUOTATION_EXPIRED") onClose();
         },
       },
@@ -93,7 +111,19 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
             isLoadingAddresses={isLoadingAddresses}
             addressId={addressId}
             onAddressChange={setPickedAddressId}
-          />
+            courierFee={courier?.fee ?? null}
+          >
+            {addressId && (
+              <CourierOptions
+                rates={shippingRates.data}
+                isPending={shippingRates.isPending}
+                error={shippingRates.error}
+                onRetry={() => shippingRates.refetch()}
+                selectedId={courier?.id ?? null}
+                onChange={setPickedCourierId}
+              />
+            )}
+          </ShippingSection>
           <PaymentMethodSection options={request.paymentOptions} method={paymentMethod} onChange={setPaymentMethod} />
         </div>
 

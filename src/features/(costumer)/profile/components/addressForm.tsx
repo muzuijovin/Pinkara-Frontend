@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
 import { FormAlert } from "@/components/form/formAlert";
 import { SubmitButton } from "@/components/form/submitButton";
@@ -10,6 +10,7 @@ import { getErrorMessage } from "@/lib/error.lib";
 import type { Address } from "@/types/profile.type";
 import { useCreateAddress, useUpdateAddress } from "../hooks/useAddresses";
 import { addressSchema } from "@/features/validation/profileSchema";
+import { LocationPicker } from "@/features/shipping/components/locationPicker";
 
 type AddressFormProps = {
   address?: Address; // ada = mode ubah, kosong = tambah baru
@@ -27,6 +28,8 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
   const {
     register,
     handleSubmit,
+    setValue,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(addressSchema),
@@ -38,8 +41,12 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
       city: address?.city ?? "",
       postalCode: address?.postalCode ?? "",
       isDefault: address?.isDefault ?? isFirstAddress,
+      latitude: address?.latitude ?? null,
+      longitude: address?.longitude ?? null,
     },
   });
+  const [latitude, longitude] = useWatch({ control, name: ["latitude", "longitude"] });
+  const pin = latitude !== null && longitude !== null ? { latitude, longitude } : null;
 
   const onSuccess = () => {
     toast.success(address ? "Address updated." : "Address added.");
@@ -133,6 +140,14 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
           {...register("postalCode")}
         />
       </div>
+
+      <LocationPicker
+        value={pin}
+        onChange={(next) => {
+          setValue("latitude", next?.latitude ?? null, { shouldDirty: true });
+          setValue("longitude", next?.longitude ?? null, { shouldDirty: true });
+        }}
+      />
 
       {/* alamat utama tidak bisa dicabut dari sini, pilih alamat lain sebagai utama */}
       {!address?.isDefault && (

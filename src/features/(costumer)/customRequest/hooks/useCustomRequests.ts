@@ -112,6 +112,7 @@ export type AcceptQuotationVariables = {
   version: number;
   shippingMethod: ShippingMethod;
   addressId?: string;
+  courier?: { courierCode: string; serviceCode: string };
   paymentMethod: PaymentMethod;
   expectedTotal: number;
 };
