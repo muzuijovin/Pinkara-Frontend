@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 // logo Pinkara, dipakai di navbar landing, navbar user, navbar auth & footer.
-// Pakai versi kecil khusus (public/pinkara-mark-*.png): dipotong ke area tulisan & sudah diperkecil
+// Pakai versi kecil khusus (public/pinkara-mark-56/112/168.png): dipotong tepat di tepi cincin pink
+// (permintaan pemilik toko: cincin pink harus terlihat), sudah diperkecil
 // + dipertajam per ukuran layar (1x/2x/3x). Logo penuh resolusi tinggi ada di public/pinkara-logo.png
 export function BrandLogo({ showTagline = true }: { showTagline?: boolean }) {
   return (
@@ -13,13 +14,13 @@ export function BrandLogo({ showTagline = true }: { showTagline?: boolean }) {
       {/* <img> biasa (bukan next/image) supaya srcSet 1x/2x/3x hasil resize sendiri dipakai apa adanya */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/pinkara-mark-96.png"
-        srcSet="/pinkara-mark-48.png 1x, /pinkara-mark-96.png 2x, /pinkara-mark-144.png 3x"
+        src="/pinkara-mark-112.png"
+        srcSet="/pinkara-mark-56.png 1x, /pinkara-mark-112.png 2x, /pinkara-mark-168.png 3x"
         alt=""
-        width={48}
-        height={48}
+        width={56}
+        height={56}
         fetchPriority="high"
-        className="size-12 shrink-0 rounded-full"
+        className="size-14 shrink-0 rounded-full"
       />
       <span aria-hidden="true" className="flex flex-col">
         <span className="text-xl font-bold leading-6 text-accent-text">Pinkara</span>
