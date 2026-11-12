@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import QueryProvider from "@/providers/queryProviders";
 import ToastProvider from "@/providers/toastProvider";
-import CartHydration from "@/providers/cartHydration";
 
 export const metadata: Metadata = {
   title: "Pinkara Studio",
@@ -24,7 +23,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <QueryProvider>
           {children}
           <ToastProvider />
-          <CartHydration />
         </QueryProvider>
       </body>
     </html>

@@ -2,11 +2,28 @@
 
 import Link from "next/link";
 import { PiShoppingCartSimple } from "react-icons/pi";
-import { selectCartCount, useCartStore } from "@/store/useCartStore";
+import { useCart } from "@/features/(costumer)/cart/hooks/useCart";
 
-// ikon keranjang (PRD §6.1: tampil untuk tamu & customer) + badge jumlah item dari keranjang lokal
-export function CartLink() {
-  const count = useCartStore(selectCartCount);
+// ikon keranjang (PRD §6.1: tampil untuk tamu & customer) + badge jumlah unit dari GET /cart.
+// Tamu (guest): tanpa badge & tanpa GET /cart, langsung ke /login lalu kembali ke /cart setelah login
+export function CartLink({ guest = false }: { guest?: boolean }) {
+  if (guest) {
+    return (
+      <Link
+        href={`/login?redirect=${encodeURIComponent("/cart")}`}
+        aria-label="Cart (log in to view)"
+        className="btn btn-ghost btn-square size-11 text-ink"
+      >
+        <PiShoppingCartSimple aria-hidden="true" size={22} />
+      </Link>
+    );
+  }
+  return <CustomerCartLink />;
+}
+
+function CustomerCartLink() {
+  const { data: cart } = useCart();
+  const count = cart?.summary.itemCount ?? 0;
 
   return (
     <Link

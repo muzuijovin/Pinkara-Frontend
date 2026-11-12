@@ -15,6 +15,10 @@ export function useSession() {
       return res.data.data;
     },
     retry: false,
+    // tamu (401) jangan di-fetch ulang setiap ada komponen baru yang memakai useSession.
+    // Tanpa ini: error -> navbar tamu muncul -> komponen di dalamnya memanggil useSession -> fetch ulang
+    // -> status kembali pending -> navbar jadi skeleton -> ... berulang terus (navbar skeleton selamanya)
+    retryOnMount: false,
     staleTime: 60 * 1000,
     // ambil ulang saat kembali ke tab ini: status verifikasi email / nama / foto yang diubah
     // di tab atau perangkat lain langsung ikut terbaru (default QueryProvider mematikan ini)
