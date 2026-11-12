@@ -69,7 +69,7 @@ function Changes({ log }: { log: AuditLog }) {
         {rows.map((row) => (
           <div key={row.key} className="grid gap-0.5">
             <dt className="font-medium text-ink">{humanize(row.key)}</dt>
-            <dd className="flex flex-wrap items-center gap-1.5 text-ink-muted [overflow-wrap:anywhere]">
+            <dd className="flex flex-wrap items-center gap-1.5 text-ink-muted wrap-anywhere">
               {log.before && (
                 <>
                   <span>{formatValue(row.before)}</span>
@@ -94,7 +94,7 @@ function Changes({ log }: { log: AuditLog }) {
 function Target({ log }: { log: AuditLog }) {
   const label = log.target.label ?? `Deleted ${ENTITY_LABEL[log.entity].toLowerCase()}`;
   return log.target.href ? (
-    <Link href={log.target.href} className="font-medium text-ink underline-offset-2 hover:underline [overflow-wrap:anywhere]">
+    <Link href={log.target.href} className="font-medium text-ink underline-offset-2 hover:underline wrap-anywhere">
       {label}
     </Link>
   ) : (

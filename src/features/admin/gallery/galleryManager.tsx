@@ -329,7 +329,7 @@ export function GalleryManager() {
       {isPending && (
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }, (_, index) => (
-            <div key={index} className="skeleton aspect-[3/4] w-full" />
+            <div key={index} className="skeleton aspect-3/4 w-full" />
           ))}
         </div>
       )}
