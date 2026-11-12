@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { PiShoppingCartSimple } from "react-icons/pi";
+import { selectCartCount, useCartStore } from "@/store/useCartStore";
 
-// ikon keranjang (PRD §6.1: tampil untuk tamu & user). count diisi setelah API keranjang siap
-export function CartLink({ count = 0 }: { count?: number }) {
+// ikon keranjang (PRD §6.1: tampil untuk tamu & customer) + badge jumlah item dari keranjang lokal
+export function CartLink() {
+  const count = useCartStore(selectCartCount);
+
   return (
     <Link
       href="/cart"
