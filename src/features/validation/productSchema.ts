@@ -23,12 +23,16 @@ const wholeNumber = (label: string, { min, max }: { min: number; max?: number })
     .refine((value) => max === undefined || Number(value) <= max, `${label} must be at most ${max}`);
 
 const variantSchema = z.object({
+  // terisi = varian lama (mode edit), kosong = varian baru
+  variantId: z.string().optional(),
   label: z.string().trim().min(1, "Label is required").max(20, "Label must be at most 20 characters"),
   price: wholeNumber("Price", { min: 1 }),
   stock: wholeNumber("Stock", { min: 0 }),
   sku: z.string().trim().max(50, "SKU must be at most 50 characters"),
   // "" = produk ini tidak cocok pakai kardus
   packageSize: z.enum(["", ...PRODUCT_SIZES]),
+  // false = varian disembunyikan dari pembeli (hanya bisa diatur saat edit)
+  isActive: z.boolean(),
 });
 
 export const productSchema = z
@@ -59,6 +63,8 @@ export const productSchema = z
     if (data.type === "READY") {
       if (!data.variants.length) {
         ctx.addIssue({ code: "custom", path: ["variants"], message: "Add at least 1 variant" });
+      } else if (!data.variants.some((variant) => variant.isActive)) {
+        ctx.addIssue({ code: "custom", path: ["variants"], message: "Keep at least 1 variant available for sale" });
       }
       const labels = data.variants.map((variant) => variant.label.trim().toLowerCase());
       labels.forEach((label, index) => {
@@ -86,4 +92,4 @@ export const productSchema = z
 export type ProductInput = z.infer<typeof productSchema>;
 export type VariantInput = ProductInput["variants"][number];
 
-export const EMPTY_VARIANT: VariantInput = { label: "", price: "", stock: "0", sku: "", packageSize: "" };
+export const EMPTY_VARIANT: VariantInput = { label: "", price: "", stock: "0", sku: "", packageSize: "", isActive: true };

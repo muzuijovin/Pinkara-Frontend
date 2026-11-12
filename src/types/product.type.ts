@@ -11,6 +11,7 @@ export type ProductVariant = {
   sku: string | null;
   packageSize: ProductSize | null;
   sortOrder: number;
+  isActive: boolean; // false = disembunyikan dari pembeli
 };
 
 // 1 kartu di GET /products (katalog publik, landing, produk terkait)
@@ -99,4 +100,12 @@ export type Product = {
   variants: ProductVariant[];
   createdAt: string;
   updatedAt: string;
+};
+
+// GET /products/admin/:id (form edit admin): semua field + version (optimistic locking)
+// + dampak bila dihapus, mis. "ada di 3 keranjang dan 1 pesanan" (PRD §12.1d)
+export type AdminProductDetail = Product & {
+  deletedAt: string | null;
+  category: { id: string; name: string; slug: string };
+  impact: { cartCount: number; activeOrderCount: number };
 };

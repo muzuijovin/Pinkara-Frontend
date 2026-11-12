@@ -18,7 +18,8 @@ type VariantsFieldProps = {
 const inputClass = (hasError: boolean) =>
   `input input-sm h-10 w-full text-base sm:text-sm ${hasError ? "input-error" : ""}`;
 
-// varian produk ready stock: label, harga, stok, SKU, ukuran kardus (PRD §12.1b)
+// varian produk ready stock: label, harga, stok, SKU, ukuran kardus (PRD §12.1b).
+// Mode edit: stok varian lama ditampilkan apa adanya, selisihnya dikirim ke BE sebagai stockDelta
 // tiap varian = 1 kartu supaya tetap rapi di HP (bukan tabel lebar yang perlu scroll samping)
 export function VariantsField({ control, register, errors }: VariantsFieldProps) {
   const { fields, append, remove } = useFieldArray({ control, name: "variants" });
@@ -130,6 +131,18 @@ export function VariantsField({ control, register, errors }: VariantsFieldProps)
                 </select>
               </div>
             </div>
+
+            {/* hanya varian lama (mode edit): sembunyikan tanpa menghapus, mis. ukuran sedang tidak dijual */}
+            {field.variantId && (
+              <label className="mt-3 flex w-fit cursor-pointer items-center gap-2.5">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-primary toggle-sm"
+                  {...register(`variants.${index}.isActive`)}
+                />
+                <span className="text-sm text-ink">Available for sale</span>
+              </label>
+            )}
           </fieldset>
         );
       })}
