@@ -116,3 +116,62 @@ export type OrderDetail = {
   }[];
   statusHistory: { toStatus: OrderStatus; remark: string | null; createdAt: string }[];
 };
+
+// tab di halaman Pesanan Saya
+export type OrderTab = "active" | "completed" | "cancelled";
+
+// 1 kartu di GET /orders
+export type OrderListItem = {
+  code: string;
+  type: "READY" | "CUSTOM";
+  status: OrderStatus;
+  total: number;
+  paymentMethod: PaymentMethod | null;
+  shippingMethod: ShippingMethod;
+  expiresAt: string;
+  createdAt: string;
+  itemCount: number; // jumlah unit produk
+  firstItem: { productName: string; variantLabel: string | null; imageUrl: string | null; quantity: number } | null;
+  otherProducts: number; // jumlah produk lain selain firstItem
+};
+
+// ===== ADMIN =====
+
+// 1 baris di GET /admin/orders
+export type AdminOrderListItem = Omit<OrderListItem, "firstItem"> & {
+  paidAt: string | null;
+  user: { name: string; email: string };
+  firstItem: { productName: string; imageUrl: string | null; quantity: number } | null;
+};
+
+export type AdminOrderStatusCounts = Partial<Record<OrderStatus, number>>;
+
+// GET /admin/orders/:code (+ semua aksi admin)
+export type AdminOrderDetail = Omit<OrderDetail, "serverTime" | "payment" | "items" | "statusHistory"> & {
+  shippedAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  refundAmount: number | null;
+  refundReason: string | null;
+  refundedAt: string | null;
+  user: { name: string; email: string; phone: string | null };
+  items: (Omit<OrderDetail["items"][number], "productSlug" | "addons"> & {
+    addons: (OrderLineAddon & { id: string; packedAt: string | null })[];
+  })[];
+  payments: {
+    method: PaymentMethod;
+    provider: string | null;
+    status: PaymentStatus;
+    amount: number;
+    paidAmount: number | null;
+    vaBank: VaBank | null;
+    paidAt: string | null;
+    createdAt: string;
+  }[];
+  statusHistory: { toStatus: OrderStatus; remark: string | null; createdAt: string; actor: { name: string; role: "ADMIN" | "CUSTOMER" } | null }[];
+  allowedNextStatuses: OrderStatus[];
+  canCancel: boolean;
+  canRefund: boolean;
+  canPack: boolean;
+};

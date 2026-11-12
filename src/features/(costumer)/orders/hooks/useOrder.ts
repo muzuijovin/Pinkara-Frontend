@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "@/lib/axios-instance.lib";
-import type { ApiResponse } from "@/types/api-response.type";
-import type { OrderDetail, VaBank } from "@/types/order.type";
+import type { ApiListResponse, ApiResponse, PaginationMeta } from "@/types/api-response.type";
+import type { OrderDetail, OrderListItem, OrderTab, VaBank } from "@/types/order.type";
 
 export const orderQueryKey = (code: string) => ["orders", code] as const;
 
@@ -44,5 +44,22 @@ export function useSimulatePayment(code: string) {
       return res.data.data;
     },
     onSuccess: (order) => queryClient.setQueryData(orderQueryKey(code), order),
+  });
+}
+
+export type OrdersParams = { status?: OrderTab; page: number };
+
+// GET /orders -> Pesanan Saya (terbaru dulu), 10 per halaman
+export function useOrders(params: OrdersParams) {
+  return useQuery({
+    queryKey: ["orders", "list", params],
+    queryFn: async () => {
+      const res = await axiosInstance.get<
+        ApiListResponse<OrderListItem, PaginationMeta & { totalOrders: number }>
+      >("/orders", { params: { status: params.status, page: params.page, limit: 10 } });
+      return { orders: res.data.data, meta: res.data.meta };
+    },
+    // daftar halaman sebelumnya tetap tampil selama tab / halaman baru dimuat
+    placeholderData: keepPreviousData,
   });
 }
