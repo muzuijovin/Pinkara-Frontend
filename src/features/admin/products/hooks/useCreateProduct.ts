@@ -20,6 +20,7 @@ function toFormData({ values, images, status }: CreateProductVariables) {
   formData.append("description", values.description);
   formData.append("status", status);
   formData.append("isFeatured", String(values.isFeatured));
+  if (values.announce && status === "ACTIVE") formData.append("announce", "true");
   if (values.dimensions) formData.append("dimensions", values.dimensions);
   if (values.materials) formData.append("materials", values.materials);
   if (values.productionDays) formData.append("productionDays", values.productionDays);
