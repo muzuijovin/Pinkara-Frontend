@@ -53,7 +53,7 @@ export function CatalogHeader({ totalProducts, onOpenFilters }: CatalogHeaderPro
           <h1 className="text-2xl font-bold text-ink md:text-3xl">Flower Catalog</h1>
           <p className="mt-1 text-sm text-ink-muted" aria-live="polite">
             {totalProducts === undefined
-              ? "Fresh bouquets and arrangements, delivered across Jabodetabek."
+              ? "Fresh bouquets and arrangements, delivered across Greater Malang."
               : `${totalProducts} ${totalProducts === 1 ? "product" : "products"}${filters.search ? ` for "${filters.search}"` : ""}`}
           </p>
         </div>
