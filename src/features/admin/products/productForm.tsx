@@ -39,6 +39,7 @@ const DEFAULT_VALUES: ProductInput = {
   dimensions: "",
   materials: "",
   isFeatured: false,
+  announce: false,
   useCategoryAddons: true,
   allowedAddonTypes: [],
 };
@@ -104,6 +105,7 @@ function toFormValues(product: AdminProductDetail): ProductInput {
     dimensions: product.dimensions ?? "",
     materials: product.materials ?? "",
     isFeatured: product.isFeatured,
+    announce: false,
     // saat edit, add-on yang tersimpan selalu dipilih manual (tidak ada lagi "ikut kategori")
     useCategoryAddons: false,
     allowedAddonTypes: product.allowedAddonTypes,
@@ -461,6 +463,27 @@ export function ProductForm({ product, onReload }: ProductFormProps) {
                 <span className="flex flex-col">
                   <span className="text-sm font-medium text-ink">Featured product</span>
                   <span className="text-xs text-ink-muted">Shown in &quot;Featured&quot; on the home page.</span>
+                </span>
+              </label>
+
+              {/* pengumuman lonceng hanya terkirim kalau produk tampil (Active / Publish) */}
+              <label className={`flex items-start gap-3 ${isEdit && status !== "ACTIVE" ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
+                <input
+                  type="checkbox"
+                  disabled={isEdit && status !== "ACTIVE"}
+                  aria-describedby="announce-hint"
+                  className="toggle toggle-primary toggle-sm mt-0.5"
+                  {...register("announce")}
+                />
+                <span className="flex flex-col">
+                  <span className="text-sm font-medium text-ink">Announce to customers</span>
+                  <span id="announce-hint" className="text-xs text-ink-muted">
+                    {isEdit
+                      ? status === "ACTIVE"
+                        ? "Send a \"New arrival\" notification when you save."
+                        : "Only available when the status is Active."
+                      : "Send a \"New arrival\" notification when you publish. Not sent for drafts."}
+                  </span>
                 </span>
               </label>
 

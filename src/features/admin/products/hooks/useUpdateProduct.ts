@@ -26,6 +26,7 @@ function toFormData({ version, values, images, status, originalStock }: UpdatePr
   formData.append("description", values.description);
   formData.append("status", status);
   formData.append("isFeatured", String(values.isFeatured));
+  if (values.announce && status === "ACTIVE") formData.append("announce", "true");
   // string kosong tetap dikirim supaya admin bisa mengosongkan dimensi / bahan
   formData.append("dimensions", values.dimensions);
   formData.append("materials", values.materials);

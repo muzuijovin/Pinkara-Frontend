@@ -2,6 +2,7 @@
 
 import { BrandLogo } from "@/components/layout/brandLogo";
 import { VerifyEmailBanner } from "@/features/auth/components/verifyEmailBanner";
+import { NotificationBell } from "@/features/notifications/notificationBell";
 import type { User } from "@/types/auth.type";
 import { AccountMenu } from "./components/accountMenu";
 import { CartLink } from "./components/cartLink";
@@ -10,7 +11,7 @@ import { MobileMenu } from "./components/mobileMenu";
 import { SearchBar } from "./components/searchBar";
 
 // navbar setelah login, mengikuti header Figma (1:1866).
-// Admin: tanpa keranjang & menu "Custom Order" diganti "Admin panel"
+// Admin: tanpa keranjang & menu "Custom Order" diganti "Admin panel". Lonceng notifikasi untuk semua role
 export function NavbarUser({ user }: { user: User }) {
   return (
     <header className="sticky top-0 z-40 border-b border-base-300 bg-base-100">
@@ -25,6 +26,7 @@ export function NavbarUser({ user }: { user: User }) {
         <div className="navbar-end ml-auto w-auto gap-1 lg:gap-4">
           <DesktopNav role={user.role} />
           <div aria-hidden="true" className="divider divider-horizontal mx-0 hidden h-6 self-center lg:flex" />
+          <NotificationBell />
           {user.role === "CUSTOMER" && <CartLink />}
           <AccountMenu user={user} />
         </div>

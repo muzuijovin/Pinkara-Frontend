@@ -55,6 +55,8 @@ export const productSchema = z
     dimensions: z.string().trim().max(100, "Dimensions must be at most 100 characters"),
     materials: z.string().trim().max(1000, "Materials must be at most 1000 characters"),
     isFeatured: z.boolean(),
+    // kirim notifikasi "New arrival" ke lonceng semua customer (tidak disimpan di produk)
+    announce: z.boolean(),
     // true = ikut add-on default kategori (field tidak dikirim ke BE)
     useCategoryAddons: z.boolean(),
     allowedAddonTypes: z.array(z.enum(ADDON_TYPES)),
