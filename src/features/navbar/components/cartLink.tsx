@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PiShoppingBag } from "react-icons/pi";
+import { PiShoppingCartSimple } from "react-icons/pi";
 
 // ikon keranjang (PRD §6.1: tampil untuk tamu & user). count diisi setelah API keranjang siap
 export function CartLink({ count = 0 }: { count?: number }) {
@@ -9,7 +9,7 @@ export function CartLink({ count = 0 }: { count?: number }) {
       aria-label={count > 0 ? `Cart, ${count} ${count === 1 ? "item" : "items"}` : "Cart"}
       className="btn btn-ghost btn-square relative size-11 text-ink"
     >
-      <PiShoppingBag aria-hidden="true" size={22} />
+      <PiShoppingCartSimple aria-hidden="true" size={22} />
       {count > 0 && (
         <span
           aria-hidden="true"

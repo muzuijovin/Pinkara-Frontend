@@ -102,3 +102,10 @@ body {
   background-color: var(--color-page);
   color: var(--color-ink);
 }
+
+/* menu daisyUI: item aktif (aria-current) & yang sedang ditekan defaultnya pakai warna neutral
+   (#000 di tema ini) -> jadi hitam. Ganti ke pink lembut brand (kontras teks 5.4:1, lolos WCAG AA) */
+.menu {
+  --menu-active-bg: var(--color-accent-soft);
+  --menu-active-fg: var(--color-accent-text);
+}
