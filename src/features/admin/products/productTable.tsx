@@ -3,13 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { PiCaretLeft, PiCaretRight, PiImageSquare, PiMagnifyingGlass, PiPackage, PiPencilSimple, PiPlus, PiStarFill } from "react-icons/pi";
+import { useState } from "react";
+import { PiCaretLeft, PiCaretRight, PiImageSquare, PiMagnifyingGlass, PiPackage, PiPencilSimple, PiPlus, PiStarFill, PiTrash } from "react-icons/pi";
 import { useDebouncedCallback } from "use-debounce";
 import { FormAlert } from "@/components/form/formAlert";
 import { formatPriceRange } from "@/lib/currency.lib";
 import { formatDateWIB } from "@/lib/datetime.lib";
 import { getErrorMessage } from "@/lib/error.lib";
 import type { AdminProductListItem, ProductStatus } from "@/types/product.type";
+import { DeleteProductDialog } from "./components/deleteProductDialog";
 import { useAdminProducts } from "./hooks/useAdminProducts";
 
 const STATUS_TABS: { value: ProductStatus | ""; label: string }[] = [
@@ -64,6 +66,8 @@ export function ProductTable() {
   const status = isProductStatus(statusParam) ? statusParam : undefined;
 
   const { data, isPending, isError, error, isFetching, refetch } = useAdminProducts({ page, search, status });
+  // produk yang sedang dikonfirmasi untuk dihapus (null = popup tertutup)
+  const [deleteTarget, setDeleteTarget] = useState<AdminProductListItem | null>(null);
   const products = data?.products ?? [];
   const meta = data?.meta;
 
@@ -222,15 +226,26 @@ export function ProductTable() {
                         <StatusBadge status={product.status} />
                       </td>
                       <td className="whitespace-nowrap text-sm text-ink-muted">{formatDateWIB(product.updatedAt)}</td>
-                      <td className="text-right">
-                        <Link
-                          href={`/admin/products/${product.id}/edit`}
-                          aria-label={`Edit ${product.name}`}
-                          className="btn btn-ghost btn-sm h-9 gap-1.5 text-ink"
-                        >
-                          <PiPencilSimple aria-hidden="true" size={16} />
-                          Edit
-                        </Link>
+                      <td>
+                        <div className="flex justify-end gap-1">
+                          <Link
+                            href={`/admin/products/${product.id}/edit`}
+                            aria-label={`Edit ${product.name}`}
+                            className="btn btn-ghost btn-sm h-9 gap-1.5 text-ink"
+                          >
+                            <PiPencilSimple aria-hidden="true" size={16} />
+                            Edit
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(product)}
+                            aria-label={`Delete ${product.name}`}
+                            className="btn btn-ghost btn-sm h-9 gap-1.5 text-danger-text hover:bg-danger-soft"
+                          >
+                            <PiTrash aria-hidden="true" size={16} />
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -241,10 +256,10 @@ export function ProductTable() {
             {/* HP: kartu, supaya tidak perlu scroll ke samping */}
             <ul className="divide-y divide-base-300 md:hidden">
               {products.map((product) => (
-                <li key={product.id}>
+                <li key={product.id} className="p-4">
                   <Link
                     href={`/admin/products/${product.id}/edit`}
-                    className="flex gap-3 p-4 transition-colors hover:bg-surface-muted/60"
+                    className="flex gap-3 rounded-lg transition-colors hover:bg-surface-muted/60"
                   >
                     <ProductThumb product={product} />
                     <div className="min-w-0 flex-1">
@@ -265,12 +280,40 @@ export function ProductTable() {
                       </div>
                     </div>
                   </Link>
+                  <div className="mt-3 flex justify-end gap-2">
+                    <Link
+                      href={`/admin/products/${product.id}/edit`}
+                      aria-label={`Edit ${product.name}`}
+                      className="btn btn-outline btn-sm h-10 gap-1.5 border-base-300 text-ink"
+                    >
+                      <PiPencilSimple aria-hidden="true" size={16} />
+                      Edit
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(product)}
+                      aria-label={`Delete ${product.name}`}
+                      className="btn btn-outline btn-sm h-10 gap-1.5 border-base-300 text-danger-text hover:border-danger-text hover:bg-danger-soft"
+                    >
+                      <PiTrash aria-hidden="true" size={16} />
+                      Delete
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
           </>
         )}
       </section>
+
+      {deleteTarget && (
+        <DeleteProductDialog
+          product={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          // produk terakhir di halaman ini dihapus -> mundur 1 halaman supaya tidak kosong
+          onDeleted={() => products.length === 1 && page > 1 && updateParams({ page: String(page - 1) })}
+        />
+      )}
 
       {meta && meta.totalPage > 1 && (
         <nav aria-label="Pagination" className="mt-4 flex items-center justify-between gap-3">

@@ -10,7 +10,8 @@ import {
   PRODUCT_IMAGE_TYPES,
 } from "@/features/validation/productSchema";
 
-export type ProductImage = { id: string; file: File; url: string };
+// file kosong = foto lama yang sudah tersimpan (URL Cloudinary), file terisi = foto baru yang belum diupload
+export type ProductImage = { id: string; url: string; file?: File };
 
 type ProductImagesInputProps = {
   images: ProductImage[];
@@ -41,9 +42,12 @@ export function ProductImagesInput({ images, onChange, error }: ProductImagesInp
   };
 
   const remove = (target: ProductImage) => {
-    URL.revokeObjectURL(target.url);
+    if (target.file) URL.revokeObjectURL(target.url);
     onChange(images.filter((image) => image.id !== target.id));
   };
+
+  // BE selalu menaruh foto baru di belakang foto lama, jadi foto baru tidak boleh dipindah ke depan foto lama
+  const canSwap = (a: number, b: number) => !(images[b].file && !images[a].file);
 
   const move = (index: number, direction: -1 | 1) => {
     const next = [...images];
@@ -82,7 +86,7 @@ export function ProductImagesInput({ images, onChange, error }: ProductImagesInp
                 <div className="flex">
                   <button
                     type="button"
-                    disabled={index === 0}
+                    disabled={index === 0 || !canSwap(index - 1, index)}
                     onClick={() => move(index, -1)}
                     aria-label={`Move photo ${index + 1} left`}
                     className="btn btn-ghost btn-square btn-sm size-9"
@@ -91,7 +95,7 @@ export function ProductImagesInput({ images, onChange, error }: ProductImagesInp
                   </button>
                   <button
                     type="button"
-                    disabled={index === images.length - 1}
+                    disabled={index === images.length - 1 || !canSwap(index, index + 1)}
                     onClick={() => move(index, 1)}
                     aria-label={`Move photo ${index + 1} right`}
                     className="btn btn-ghost btn-square btn-sm size-9"
