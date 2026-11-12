@@ -14,7 +14,7 @@ export default function AuthNavbar() {
           <Link href="/" className="btn btn-ghost h-11 gap-2 px-3 text-sm font-medium text-ink hover:text-primary">
             <PiArrowLeft aria-hidden="true" size={18} />
             <span>
-              Kembali<span className="hidden sm:inline"> ke Beranda</span>
+              Back<span className="hidden sm:inline"> to Home</span>
             </span>
           </Link>
         </div>

@@ -6,7 +6,7 @@ export function BrandLogo({ showTagline = true }: { showTagline?: boolean }) {
   return (
     <Link
       href="/"
-      aria-label="Pinkara Florist Studio, ke beranda"
+      aria-label="Pinkara Florist Studio, go to homepage"
       className="flex shrink-0 cursor-pointer items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
     >
       <span

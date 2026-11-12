@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BrandLogo } from "@/components/layout/brandLogo";
+import { CartLink } from "./components/cartLink";
 import { DesktopNav } from "./components/desktopNav";
 import { MobileMenu } from "./components/mobileMenu";
 import { SearchBar } from "./components/searchBar";
@@ -16,10 +17,10 @@ export function NavbarLanding() {
             {/* tombol akun versi HP, di sm ke atas sudah tampil di header */}
             <div className="grid grid-cols-2 gap-2 sm:hidden">
               <Link href="/login" className="btn btn-outline btn-primary h-11">
-                Masuk
+                Log in
               </Link>
               <Link href="/register" className="btn btn-primary h-11">
-                Daftar
+                Sign up
               </Link>
             </div>
           </MobileMenu>
@@ -31,11 +32,12 @@ export function NavbarLanding() {
         <div className="navbar-end ml-auto w-auto gap-2 lg:gap-4">
           <DesktopNav />
           <div aria-hidden="true" className="divider divider-horizontal mx-0 hidden h-6 self-center lg:flex" />
+          <CartLink />
           <Link href="/login" className="btn btn-ghost hidden h-11 px-4 text-[15px] text-ink sm:inline-flex">
-            Masuk
+            Log in
           </Link>
           <Link href="/register" className="btn btn-primary hidden h-11 px-5 text-[15px] sm:inline-flex">
-            Daftar
+            Sign up
           </Link>
         </div>
       </div>
