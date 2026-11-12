@@ -25,8 +25,8 @@ export function LoginForm() {
 
   return (
     <AuthCard
-      title="Log in to Pinkara"
-      description="Log in to check out, pay for your orders, and request custom arrangements."
+      title="Welcome back"
+      description="Log in to see your cart, track your orders, and request custom bouquets."
       footer={
         <>
           Don&apos;t have an account?{" "}

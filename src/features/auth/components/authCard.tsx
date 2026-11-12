@@ -14,7 +14,8 @@ export function AuthCard({ title, description, icon, children, footer }: AuthCar
     <div className="flex justify-center px-4 py-10 sm:py-16">
       <section className="card w-full max-w-md border border-base-300 bg-base-100 shadow-sm">
         <div className="card-body gap-6 p-6 sm:p-8">
-          <header className="flex flex-col gap-2">
+          {/* judul rapat (tracking-tight, leading-tight) + deskripsi pendek dengan lebar baris terbatas supaya enak dibaca */}
+          <header className="flex flex-col gap-1.5">
             {icon && (
               <span
                 aria-hidden="true"
@@ -23,8 +24,8 @@ export function AuthCard({ title, description, icon, children, footer }: AuthCar
                 {icon}
               </span>
             )}
-            <h1 className="text-2xl font-bold text-ink">{title}</h1>
-            {description && <p className="text-sm leading-relaxed text-ink-muted">{description}</p>}
+            <h1 className="text-[1.75rem] font-bold leading-tight tracking-tight text-ink">{title}</h1>
+            {description && <p className="max-w-[34ch] text-[15px] leading-relaxed text-ink-muted">{description}</p>}
           </header>
           {children}
         </div>

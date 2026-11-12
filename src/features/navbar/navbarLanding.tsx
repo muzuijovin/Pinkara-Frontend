@@ -32,7 +32,8 @@ export function NavbarLanding() {
         <div className="navbar-end ml-auto w-auto gap-2 lg:gap-4">
           <DesktopNav />
           <div aria-hidden="true" className="divider divider-horizontal mx-0 hidden h-6 self-center lg:flex" />
-          <CartLink />
+          {/* keranjang wajib login -> tamu langsung ke halaman login */}
+          <CartLink guest />
           <Link href="/login" className="btn btn-ghost hidden h-11 px-4 text-[15px] text-ink sm:inline-flex">
             Log in
           </Link>

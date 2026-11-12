@@ -7,6 +7,7 @@ type QuantityActionsProps = {
   total: number;
   disabled: boolean; // stok habis / form add-on belum valid
   disabledReason?: string;
+  isPending?: boolean; // sedang menambahkan ke keranjang
   onQuantityChange: (quantity: number) => void;
   onAddToCart: () => void;
   onBuyNow: () => void;
@@ -19,6 +20,7 @@ export function QuantityActions({
   total,
   disabled,
   disabledReason,
+  isPending = false,
   onQuantityChange,
   onAddToCart,
   onBuyNow,
@@ -57,13 +59,22 @@ export function QuantityActions({
       </div>
 
       <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
-        <button type="button" disabled={disabled} onClick={onAddToCart} className="btn btn-primary h-12 gap-2 text-[15px]">
-          <PiShoppingCartSimple aria-hidden="true" size={20} />
-          Add to cart · <span className="tabular-nums">{formatRupiah(total)}</span>
+        <button
+          type="button"
+          disabled={disabled || isPending}
+          onClick={onAddToCart}
+          className="btn btn-primary h-12 gap-2 text-[15px]"
+        >
+          {isPending ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-sm" />
+          ) : (
+            <PiShoppingCartSimple aria-hidden="true" size={20} />
+          )}
+          {isPending ? "Adding..." : "Add to cart"} · <span className="tabular-nums">{formatRupiah(total)}</span>
         </button>
         <button
           type="button"
-          disabled={disabled}
+          disabled={disabled || isPending}
           onClick={onBuyNow}
           className="btn btn-outline btn-primary h-12 gap-2 text-[15px]"
         >

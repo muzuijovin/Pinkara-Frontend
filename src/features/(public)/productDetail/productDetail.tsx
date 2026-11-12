@@ -8,7 +8,9 @@ import { toast } from "react-toastify";
 import { FormAlert } from "@/components/form/formAlert";
 import { categoryHref } from "@/features/categories/hooks/useCategories";
 import { getErrorMessage } from "@/lib/error.lib";
-import { useCartStore, type CartItemAddons } from "@/store/useCartStore";
+import { useAddToCart } from "@/features/(costumer)/cart/hooks/useCart";
+import { useSession } from "@/features/auth/hooks/useSession";
+import type { CartAddonsPayload } from "@/types/cart.type";
 import type { ProductDetail } from "@/types/product.type";
 import { AddOnsSelector, EMPTY_ADDONS, packagingOptionsFor, type AddonSelection } from "./components/addOnsSelector";
 import { CustomOrderCta } from "./components/customOrderCta";
@@ -48,7 +50,8 @@ function DetailSkeleton() {
 // form pembelian produk ready stock: varian, add-on, jumlah, tombol keranjang
 function ReadyStockPurchase({ product }: { product: ProductDetail }) {
   const router = useRouter();
-  const addItem = useCartStore((state) => state.addItem);
+  const { data: user } = useSession();
+  const { mutate: addItem, isPending: isAdding } = useAddToCart();
 
   const [variant, setVariant] = useState<Variant | undefined>(() => defaultVariant(product));
   const [quantity, setQuantity] = useState(1);
@@ -92,44 +95,39 @@ function ReadyStockPurchase({ product }: { product: ProductDetail }) {
     }));
   };
 
-  const buildAddons = (): CartItemAddons => ({
-    packaging:
-      addons.packaging.enabled && packaging?.size
-        ? { addonId: packaging.id, name: packaging.name, size: packaging.size, price: packaging.price }
-        : undefined,
-    paperBag:
-      addons.paperBag.enabled && paperBag
-        ? { addonId: paperBag.id, price: paperBag.price, quantity: addons.paperBag.quantity }
-        : undefined,
-    giftCard:
-      addons.giftCard.enabled && giftCard
-        ? {
-            addonId: giftCard.id,
-            price: giftCard.price,
-            message: addons.giftCard.message.trim(),
-            senderName: addons.giftCard.anonymous ? "" : addons.giftCard.senderName.trim(),
-            anonymous: addons.giftCard.anonymous,
-          }
-        : undefined,
+  // pilihan add-on -> format BE (POST /cart/items). Aturan kardus / paper bag / gift card dicek ulang BE
+  const buildAddons = (): CartAddonsPayload => ({
+    packagingId: addons.packaging.enabled ? addons.packaging.addonId : null,
+    paperBagQuantity: addons.paperBag.enabled ? addons.paperBag.quantity : null,
+    giftCard: addons.giftCard.enabled
+      ? {
+          message: addons.giftCard.message.trim(),
+          senderName: addons.giftCard.anonymous ? "" : addons.giftCard.senderName.trim(),
+          hideSender: addons.giftCard.anonymous,
+        }
+      : null,
   });
 
-  const addToCart = () => {
-    if (!variant || stock === 0 || giftError) return false;
-    addItem({
-      productId: product.id,
-      slug: product.slug,
-      name: product.name,
-      image: product.images[0] ?? null,
-      type: product.type,
-      variantId: variant.id,
-      variantLabel: variant.label,
-      unitPrice: variant.price,
-      maxQuantity: variant.stock,
-      quantity,
-      addons: buildAddons(),
-    });
-    return true;
+  // keranjang disimpan di akun -> tamu login dulu, lalu kembali ke produk ini
+  const addToCart = (onAdded: () => void) => {
+    if (!variant || stock === 0 || giftError) return;
+    if (!user) {
+      toast.info("Log in to add items to your cart.");
+      router.push(`/login?redirect=${encodeURIComponent(`/products/${product.slug}`)}`);
+      return;
+    }
+    addItem(
+      { variantId: variant.id, quantity, addons: buildAddons() },
+      {
+        onSuccess: onAdded,
+        onError: (err) => toast.error(getErrorMessage(err, "Couldn't add to cart. Please try again.")),
+      },
+    );
   };
+
+  const isAdmin = user?.role === "ADMIN";
+  const disabledReason =
+    stock === 0 ? "This size is sold out. Choose another size." : isAdmin ? "Admin accounts can't shop. Log in as a customer to buy." : giftError;
 
   const showVariants = product.variants.length > 1 || product.variants[0]?.label !== "Default";
 
@@ -156,18 +154,17 @@ function ReadyStockPurchase({ product }: { product: ProductDetail }) {
           quantity={quantity}
           maxQuantity={Math.max(1, stock)}
           total={total}
-          disabled={stock === 0 || Boolean(giftError)}
-          disabledReason={stock === 0 ? "This size is sold out. Choose another size." : giftError}
+          disabled={stock === 0 || isAdmin || Boolean(giftError)}
+          isPending={isAdding}
+          disabledReason={disabledReason}
           onQuantityChange={changeQuantity}
-          onAddToCart={() => {
-            if (addToCart()) {
+          onAddToCart={() =>
+            addToCart(() => {
               toast.success(`"${product.name}" was added to your cart.`);
               setAddons(EMPTY_ADDONS);
-            }
-          }}
-          onBuyNow={() => {
-            if (addToCart()) router.push("/cart");
-          }}
+            })
+          }
+          onBuyNow={() => addToCart(() => router.push("/cart"))}
         />
       </div>
     </>
