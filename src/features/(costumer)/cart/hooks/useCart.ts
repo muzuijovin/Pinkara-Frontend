@@ -43,11 +43,56 @@ export function useAddToCart() {
   });
 }
 
-// PATCH /cart/items/:id -> ubah jumlah (add-on lama dipertahankan & disesuaikan BE)
+// Hitung isi keranjang seolah jumlah sudah berubah (optimistic update): angka, total baris & ringkasan
+// langsung berubah saat diklik tanpa menunggu server. Kardus ikut jumlah produk, paper bag maks jumlah + 2
+// (aturan sama dengan BE). Nilai final tetap dari respons server.
+export function applyQuantity(cart: Cart, itemId: string, quantity: number): Cart {
+  const items = cart.items.map((item) => {
+    if (item.id !== itemId) return item;
+
+    const addons = item.addons.map((addon) => {
+      const nextQuantity =
+        addon.type === "PACKAGING"
+          ? quantity
+          : addon.type === "PAPER_BAG"
+            ? Math.min(addon.quantity, quantity + 2)
+            : addon.quantity;
+      return { ...addon, quantity: nextQuantity, subtotal: addon.unitPrice * nextQuantity };
+    });
+    const addonsTotal = addons.reduce((total, addon) => total + addon.subtotal, 0);
+    const issue = item.issue === "INSUFFICIENT_STOCK" && quantity <= item.variant.stock ? null : item.issue;
+
+    return { ...item, quantity, addons, issue, lineTotal: item.variant.price * quantity + addonsTotal };
+  });
+
+  const checkoutable = items.filter((item) => !item.issue);
+  return {
+    items,
+    summary: {
+      itemCount: items.reduce((total, item) => total + item.quantity, 0),
+      subtotal: checkoutable.reduce((total, item) => total + item.lineTotal, 0),
+      hasIssues: checkoutable.length !== items.length,
+    },
+  };
+}
+
+// PATCH /cart/items/:id -> ubah jumlah (add-on lama dipertahankan & disesuaikan BE).
+// Tampilan sudah diubah duluan lewat applyQuantity; respons server hanya dipasang kalau tidak ada
+// klik yang lebih baru (supaya angka tidak "loncat mundur"). Gagal -> ambil ulang isi keranjang dari server
 export function useUpdateCartItem() {
-  return useCartMutation(async ({ id, quantity }: { id: string; quantity: number }) => {
-    const res = await axiosInstance.patch<ApiResponse<Cart>>(`/cart/items/${id}`, { quantity });
-    return res.data.data;
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, quantity }: { id: string; quantity: number }) => {
+      const res = await axiosInstance.patch<ApiResponse<Cart>>(`/cart/items/${id}`, { quantity });
+      return res.data.data;
+    },
+    onSuccess: (cart, { id, quantity }) => {
+      const shown = queryClient.getQueryData<Cart>(CART_QUERY_KEY)?.items.find((item) => item.id === id);
+      if (shown && shown.quantity !== quantity) return; // ada perubahan lebih baru yang sedang menunggu dikirim
+      queryClient.setQueryData(CART_QUERY_KEY, cart);
+    },
+    onError: () => queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY }),
   });
 }
 
