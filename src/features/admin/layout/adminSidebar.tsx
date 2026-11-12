@@ -23,7 +23,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: "Store",
     items: [
-      { label: "Dashboard", href: "/admin", icon: PiGauge, ready: false },
+      { label: "Dashboard", href: "/admin", icon: PiGauge, ready: true },
       { label: "Orders", href: "/admin/orders", icon: PiReceipt, ready: true },
       { label: "Custom requests", href: "/admin/custom-requests", icon: PiChatsCircle, ready: true },
       { label: "Payments", href: "/admin/payments", icon: PiCreditCard, ready: false },
