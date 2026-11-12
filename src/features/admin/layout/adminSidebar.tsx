@@ -35,13 +35,13 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { label: "Products", href: "/admin/products", icon: PiFlowerTulip, ready: true },
       { label: "Categories", href: "/admin/categories", icon: PiSquaresFour, ready: true },
       { label: "Add-ons", href: "/admin/addons", icon: PiGift, ready: true },
-      { label: "Gallery", href: "/admin/gallery", icon: PiImages, ready: false },
+      { label: "Gallery", href: "/admin/gallery", icon: PiImages, ready: true },
     ],
   },
   {
     title: "Account",
     items: [
-      { label: "Audit log", href: "/admin/audit-logs", icon: PiClipboardText, ready: false },
+      { label: "Audit log", href: "/admin/audit-logs", icon: PiClipboardText, ready: true },
       { label: "My profile", href: "/profile", icon: PiUser, ready: true },
     ],
   },
