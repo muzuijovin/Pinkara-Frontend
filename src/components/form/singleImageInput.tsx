@@ -15,10 +15,12 @@ type SingleImageInputProps = {
   removed: boolean; // foto tersimpan ditandai untuk dihapus
   onFileChange: (file: File | null) => void;
   onRemovedChange: (removed: boolean) => void;
+  required?: boolean; // foto wajib (galeri): tombol hapus hanya membatalkan foto baru
+  error?: string;
 };
 
-// 1 foto opsional (JPG/PNG/WebP maks 5 MB) dengan pratinjau, ganti & hapus. Dipakai form add-on & kategori
-export function SingleImageInput({ label, currentUrl, file, removed, onFileChange, onRemovedChange }: SingleImageInputProps) {
+// 1 foto (JPG/PNG/WebP maks 5 MB) dengan pratinjau, ganti & hapus. Dipakai form add-on, kategori, galeri
+export function SingleImageInput({ label, currentUrl, file, removed, onFileChange, onRemovedChange, required = false, error }: SingleImageInputProps) {
   const inputId = useId();
   // URL pratinjau hanya dibuat saat file berganti (bukan di setiap render)
   const fileUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
@@ -34,7 +36,10 @@ export function SingleImageInput({ label, currentUrl, file, removed, onFileChang
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-sm font-medium text-ink">{label}</span>
+      <span className="text-sm font-medium text-ink">
+        {label}
+        {required && <span aria-hidden="true" className="text-danger-text"> *</span>}
+      </span>
       <div className="flex items-center gap-4">
         <span className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-box border border-base-300 bg-surface-muted">
           {preview ? (
@@ -49,22 +54,27 @@ export function SingleImageInput({ label, currentUrl, file, removed, onFileChang
             {preview ? "Change photo" : "Upload photo"}
             <input id={inputId} type="file" accept={TYPES.join(",")} onChange={(event) => choose(event.target.files?.[0])} className="sr-only" />
           </label>
-          {preview && (
+          {preview && (!required || file) && (
             <button
               type="button"
               onClick={() => {
                 onFileChange(null);
-                if (currentUrl) onRemovedChange(true);
+                if (currentUrl && !required) onRemovedChange(true);
               }}
               className="btn btn-ghost btn-sm h-10 gap-1.5 text-danger-text hover:bg-danger-soft"
             >
               <PiTrash aria-hidden="true" size={16} />
-              Remove
+              {required ? "Undo" : "Remove"}
             </button>
           )}
         </div>
       </div>
-      <span className="text-xs text-ink-muted">Optional · JPG, PNG, or WebP · max 5 MB</span>
+      <span className="text-xs text-ink-muted">{required ? "Required" : "Optional"} · JPG, PNG, or WebP · max 5 MB</span>
+      {error && (
+        <span role="alert" className="text-xs text-danger-text">
+          {error}
+        </span>
+      )}
     </div>
   );
 }

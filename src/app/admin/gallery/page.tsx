@@ -1,5 +1,9 @@
-// kelola galeri / testimoni hasil karya untuk landing (PRD §6.1)
-// halaman belum dibuat, sementara kosong supaya build tidak gagal (page.tsx wajib export default)
+import type { Metadata } from "next";
+import { GalleryManager } from "@/features/admin/gallery/galleryManager";
+
+export const metadata: Metadata = { title: "Gallery | Pinkara Admin" };
+
+// kelola galeri hasil karya untuk landing (PRD §6.1, §12). Akses ADMIN dijaga RequireAuth di admin/layout.tsx
 export default function AdminGalleryPage() {
-  return null;
+  return <GalleryManager />;
 }
