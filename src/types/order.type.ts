@@ -20,6 +20,31 @@ export type OrderStatus =
 // CHECKOUT_BUSY = server sibuk (aman diulang dengan idempotency key yang sama)
 export type CheckoutErrorCode = "PRICE_CHANGED" | "CART_CHANGED" | "CART_EMPTY" | "ADDRESS_NOT_FOUND" | "CHECKOUT_BUSY";
 
+export type PaymentStatus =
+  | "PENDING"
+  | "WAITING_VERIFICATION"
+  | "PAID"
+  | "UNDERPAID"
+  | "OVERPAID"
+  | "REJECTED"
+  | "EXPIRED"
+  | "CANCELLED";
+export type VaBank = "bca" | "bni" | "bri" | "permata";
+
+// tagihan aktif terakhir pada order (QR / nomor VA dari gateway)
+export type OrderPayment = {
+  id: string;
+  method: PaymentMethod;
+  provider: "midtrans" | "mock" | null; // mock = mode tes lokal (ada tombol simulasi bayar)
+  status: PaymentStatus;
+  qrString: string | null;
+  vaNumber: string | null;
+  vaBank: VaBank | null;
+  amount: number;
+  expiresAt: string;
+  paidAt: string | null;
+};
+
 export type OrderLineAddon = {
   name: string;
   type: AddonType;
@@ -76,6 +101,7 @@ export type OrderDetail = {
   createdAt: string;
   serverTime: string; // jam server, untuk hitung mundur yang akurat
   promotionName: string | null;
+  payment: OrderPayment | null;
   items: {
     id: string;
     productName: string;

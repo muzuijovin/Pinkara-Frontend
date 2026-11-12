@@ -5,7 +5,7 @@ import { OrderPayment } from "@/features/(costumer)/orders/orderPayment";
 
 export const metadata: Metadata = { title: "Payment | Pinkara Studio" };
 
-// halaman bayar: hitung mundur dari expiresAt server + tagihan (PRD §9). QR / VA menyusul di feat/payment.
+// halaman bayar: hitung mundur dari expiresAt server + QR / nomor VA, status dicek tiap 5 detik (PRD §9).
 // OrderPayment baca kode pesanan pakai useParams (route dinamis) -> perlu Suspense karena cacheComponents aktif
 export default function OrderPaymentPage() {
   return (

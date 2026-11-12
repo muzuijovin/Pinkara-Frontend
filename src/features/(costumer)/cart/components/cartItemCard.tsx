@@ -1,13 +1,16 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 import { PiGift, PiImageSquare, PiMinus, PiPackage, PiPlus, PiShoppingBag, PiTrash, PiWarningCircle } from "react-icons/pi";
 import { toast } from "react-toastify";
+import { useDebouncedCallback } from "use-debounce";
 import { formatRupiah } from "@/lib/currency.lib";
 import { getErrorMessage } from "@/lib/error.lib";
-import type { CartAddonLine, CartItem } from "@/types/cart.type";
-import { useRemoveCartItem, useUpdateCartItem } from "../hooks/useCart";
+import type { Cart, CartAddonLine, CartItem } from "@/types/cart.type";
+import { applyQuantity, CART_QUERY_KEY, useRemoveCartItem, useUpdateCartItem } from "../hooks/useCart";
 
 const ADDON_ICON = { PACKAGING: PiPackage, PAPER_BAG: PiShoppingBag, GIFT_CARD: PiGift } as const;
 
@@ -49,18 +52,33 @@ function AddonDescription({ addon }: { addon: CartAddonLine }) {
 
 // 1 baris keranjang: foto, nama, varian, add-on, jumlah, total baris
 export function CartItemCard({ item }: { item: CartItem }) {
-  const { mutate: updateItem, isPending: isUpdating } = useUpdateCartItem();
+  const queryClient = useQueryClient();
+  const { mutate: updateItem } = useUpdateCartItem();
   const { mutate: removeItem, isPending: isRemoving } = useRemoveCartItem();
-  const isBusy = isUpdating || isRemoving;
+  // jumlah diubah langsung di tampilan, jadi baris hanya dikunci saat sedang dihapus
+  const isBusy = isRemoving;
   const message = issueMessage(item);
   const isUnavailable = item.issue === "UNAVAILABLE" || item.issue === "OUT_OF_STOCK";
   const productHref = `/products/${item.product.slug}`;
 
-  const changeQuantity = (quantity: number) =>
-    updateItem(
-      { id: item.id, quantity },
-      { onError: (error) => toast.error(getErrorMessage(error, "Couldn't update the quantity.")) },
-    );
+  // klik beruntun digabung: request dikirim 400 ms setelah klik terakhir, dengan jumlah akhirnya saja
+  const sendQuantity = useDebouncedCallback(
+    (quantity: number) =>
+      updateItem(
+        { id: item.id, quantity },
+        { onError: (error) => toast.error(getErrorMessage(error, "Couldn't update the quantity.")) },
+      ),
+    400,
+  );
+
+  // pindah halaman (mis. klik Checkout) sebelum 400 ms -> perubahan terakhir tetap dikirim.
+  // useEffect di sini hanya untuk membersihkan timer, bukan fetch data
+  useEffect(() => () => void sendQuantity.flush(), [sendQuantity]);
+
+  const changeQuantity = (quantity: number) => {
+    queryClient.setQueryData<Cart>(CART_QUERY_KEY, (cart) => (cart ? applyQuantity(cart, item.id, quantity) : cart));
+    sendQuantity(quantity);
+  };
 
   const remove = () =>
     removeItem(item.id, {

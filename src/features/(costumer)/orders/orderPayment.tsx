@@ -4,7 +4,7 @@ import { isAxiosError } from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { PiCheckCircle, PiClock, PiCopySimple, PiHourglassSimpleHigh, PiImageSquare, PiReceipt } from "react-icons/pi";
+import { PiCheckCircle, PiClock, PiCopySimple, PiImageSquare, PiReceipt } from "react-icons/pi";
 import { toast } from "react-toastify";
 import { FormAlert } from "@/components/form/formAlert";
 import { CheckoutSteps } from "@/components/ui/checkoutSteps";
@@ -13,6 +13,7 @@ import { formatRupiah } from "@/lib/currency.lib";
 import { formatDateTimeWIB } from "@/lib/datetime.lib";
 import { getErrorMessage } from "@/lib/error.lib";
 import type { OrderDetail, PaymentMethod } from "@/types/order.type";
+import { PaymentPanel } from "./components/paymentPanel";
 import { formatCountdown, useCountdown } from "./hooks/useCountdown";
 import { useOrder } from "./hooks/useOrder";
 
@@ -71,14 +72,8 @@ function PaymentCountdown({ order, onExpired }: { order: OrderDetail; onExpired:
         )}
       </div>
 
-      {/* QR / nomor VA dari payment gateway dipasang di branch feat/payment */}
-      <div className="flex w-full items-start gap-3 rounded-box border border-dashed border-base-300 p-4 text-left">
-        <PiHourglassSimpleHigh aria-hidden="true" size={22} className="mt-0.5 shrink-0 text-ink-muted" />
-        <p className="text-sm text-ink-muted">
-          Your {order.paymentMethod === "QRIS" ? "QR code" : "payment details"} will appear here. Your items are
-          reserved until the time runs out.
-        </p>
-      </div>
+      {/* QR / nomor VA dari payment gateway (Midtrans), atau pilih metode dulu */}
+      <PaymentPanel order={order} />
     </div>
   );
 }
@@ -188,8 +183,8 @@ function OrderSummary({ order }: { order: OrderDetail }) {
   );
 }
 
-// halaman bayar (PRD §9, langkah 3 checkout): hitung mundur dari expiresAt server + tagihan.
-// QR / nomor VA dari payment gateway menyusul (branch feat/payment)
+// halaman bayar (PRD §9, langkah 3 checkout): hitung mundur dari expiresAt server + tagihan QRIS / VA.
+// QR / nomor VA dari Midtrans (atau gateway mock di lokal); status dicek tiap 5 detik
 export function OrderPayment() {
   const { code } = useParams<{ code: string }>();
   const { data: order, isPending, isError, error, refetch } = useOrder(code);
