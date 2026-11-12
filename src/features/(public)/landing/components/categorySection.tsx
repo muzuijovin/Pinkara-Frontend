@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { PiArrowRight, PiFlowerTulip } from "react-icons/pi";
 import { categoryHref, useCategories } from "@/features/categories/hooks/useCategories";
-import { categoryImage } from "../constants/categoryImages";
 
 // Kategori (PRD §6.1): kartu kategori dengan foto; klik -> katalog terfilter
 export function CategorySection() {
@@ -33,7 +32,8 @@ export function CategorySection() {
           ))}
 
         {categories?.map((category) => {
-          const image = categoryImage(category.slug, category.imageUrl);
+          // foto dari data kategori (diatur admin di halaman Categories); kosong -> tampilan ikon
+          const image = category.imageUrl;
           return (
             <li key={category.id}>
               <Link

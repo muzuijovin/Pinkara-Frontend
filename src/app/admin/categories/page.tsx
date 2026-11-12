@@ -1,5 +1,9 @@
-// kelola kategori bunga
-// halaman belum dibuat, sementara kosong supaya build tidak gagal (page.tsx wajib export default)
+import type { Metadata } from "next";
+import { CategoryManager } from "@/features/admin/categories/categoryManager";
+
+export const metadata: Metadata = { title: "Categories | Pinkara Admin" };
+
+// kelola kategori bunga (PRD §12). Akses ADMIN dijaga RequireAuth di admin/layout.tsx
 export default function AdminCategoriesPage() {
-  return null;
+  return <CategoryManager />;
 }
