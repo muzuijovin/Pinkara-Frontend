@@ -5,37 +5,12 @@ import { useRef } from "react";
 import { PiShoppingCartSimple } from "react-icons/pi";
 import { toast } from "react-toastify";
 import { FormAlert } from "@/components/form/formAlert";
+import { CheckoutSteps } from "@/components/ui/checkoutSteps";
 import { useSession } from "@/features/auth/hooks/useSession";
 import { getErrorMessage } from "@/lib/error.lib";
 import { CartItemCard } from "./components/cartItemCard";
 import { CartSummary } from "./components/cartSummary";
 import { useCart, useClearCart } from "./hooks/useCart";
-
-const STEPS = ["Cart", "Shipping", "Payment"];
-
-// langkah belanja (Figma: Cart -> Alamat & Jadwal -> Pembayaran), keranjang = langkah 1
-function CheckoutSteps() {
-  return (
-    <ol aria-label="Checkout steps" className="flex items-center gap-2 text-sm">
-      {STEPS.map((step, index) => {
-        const current = index === 0;
-        return (
-          <li key={step} aria-current={current ? "step" : undefined} className="flex items-center gap-2">
-            {index > 0 && <span aria-hidden="true" className="h-px w-6 bg-base-300 sm:w-10" />}
-            <span
-              className={`flex size-6 items-center justify-center rounded-full text-xs font-semibold ${
-                current ? "bg-primary text-primary-content" : "bg-surface-sunken text-ink-muted"
-              }`}
-            >
-              {index + 1}
-            </span>
-            <span className={current ? "font-semibold text-ink" : "text-ink-muted"}>{step}</span>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
 
 function CartSkeleton() {
   return (
@@ -98,7 +73,7 @@ export function CartSection() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 md:px-6 md:py-8">
-      <CheckoutSteps />
+      <CheckoutSteps current={0} />
 
       <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
         <div>

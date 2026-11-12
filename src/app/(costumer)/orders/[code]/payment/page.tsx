@@ -1,5 +1,18 @@
-// halaman bayar: QR / instruksi transfer + hitung mundur dari expires_at server, upload bukti (PRD §9)
-// halaman belum dibuat, sementara kosong supaya build tidak gagal (page.tsx wajib export default)
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { PageLoader } from "@/components/ui/pageLoader";
+import { OrderPayment } from "@/features/(costumer)/orders/orderPayment";
+
+export const metadata: Metadata = { title: "Payment | Pinkara Studio" };
+
+// halaman bayar: hitung mundur dari expiresAt server + tagihan (PRD §9). QR / VA menyusul di feat/payment.
+// OrderPayment baca kode pesanan pakai useParams (route dinamis) -> perlu Suspense karena cacheComponents aktif
 export default function OrderPaymentPage() {
-  return null;
+  return (
+    <div className="bg-page">
+      <Suspense fallback={<PageLoader />}>
+        <OrderPayment />
+      </Suspense>
+    </div>
+  );
 }
