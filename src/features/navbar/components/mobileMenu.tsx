@@ -4,18 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useId, type ReactNode } from "react";
 import { PiList, PiX } from "react-icons/pi";
-import { CUSTOM_ORDER_LINK, MAIN_LINKS, isLinkActive } from "../constants/navbarData";
+import type { UserRole } from "@/types/auth.type";
+import { MAIN_LINKS, isLinkActive, roleLink } from "../constants/navbarData";
 import { useDropdown } from "../hooks/useDropdown";
 import { CategoryMenuItems } from "./categoryMenuItems";
 import { SearchBar } from "./searchBar";
 
 // menu hamburger (< lg). children = bagian akun, beda untuk tamu & user login.
 // Buka/tutup pakai state (lihat useDropdown) supaya tombol & link di dalamnya bisa disentuh di HP
-export function MobileMenu({ children }: { children?: ReactNode }) {
+export function MobileMenu({ children, role }: { children?: ReactNode; role?: UserRole }) {
   const pathname = usePathname();
   const panelId = useId();
   const { isOpen, close, toggle, containerProps } = useDropdown();
-  const links = [...MAIN_LINKS, CUSTOM_ORDER_LINK];
+  const links = [...MAIN_LINKS, roleLink(role)];
 
   return (
     <div className="relative lg:hidden" {...containerProps}>
@@ -45,7 +46,7 @@ export function MobileMenu({ children }: { children?: ReactNode }) {
             <nav aria-label="Mobile navigation">
               <ul className="menu mt-2 w-full p-0 text-[15px]">
                 {links.map((link) => {
-                  const active = isLinkActive(pathname, link.href);
+                  const active = isLinkActive(pathname, link.href, link.match);
                   return (
                     <li key={link.href}>
                       <Link

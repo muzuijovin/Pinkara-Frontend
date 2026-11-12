@@ -2,21 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  CUSTOM_ORDER_LINK,
-  MAIN_LINKS,
-  isLinkActive,
-  navItemClass,
-  type NavLink,
-} from "../constants/navbarData";
+import type { UserRole } from "@/types/auth.type";
+import { MAIN_LINKS, isLinkActive, navItemClass, roleLink, type NavLink } from "../constants/navbarData";
 import { CategoryDropdown } from "./categoryDropdown";
 
 // menu tengah (desktop >= lg). Menu aktif: cukup garis primary di bawah, warna teks tetap
-export function DesktopNav() {
+export function DesktopNav({ role }: { role?: UserRole }) {
   const pathname = usePathname();
 
-  const renderLink = ({ href, label }: NavLink) => {
-    const active = isLinkActive(pathname, href);
+  const renderLink = ({ href, label, match }: NavLink) => {
+    const active = isLinkActive(pathname, href, match);
     return (
       <li key={href}>
         <Link
@@ -37,7 +32,7 @@ export function DesktopNav() {
         <li>
           <CategoryDropdown />
         </li>
-        {renderLink(CUSTOM_ORDER_LINK)}
+        {renderLink(roleLink(role))}
       </ul>
     </nav>
   );
