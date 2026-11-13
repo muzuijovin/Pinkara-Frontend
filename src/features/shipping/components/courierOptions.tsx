@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PiClock, PiInfo, PiLightning, PiMapPinLine, PiTruck } from "react-icons/pi";
+import { PiClock, PiInfo, PiLightning, PiMapPinLine, PiRocketLaunch, PiTruck } from "react-icons/pi";
 import { FormAlert } from "@/components/form/formAlert";
 import { OptionCard } from "@/features/(costumer)/checkout/components/optionCard";
 import { formatRupiah } from "@/lib/currency.lib";
@@ -12,6 +12,7 @@ const TYPE_INFO: Record<ShippingRateType, { label: string; icon: React.ReactNode
   INSTANT: { label: "Instant", icon: <PiLightning size={20} /> },
   SAME_DAY: { label: "Same day", icon: <PiClock size={20} /> },
   REGULAR: { label: "Regular", icon: <PiTruck size={20} /> },
+  EXPRESS: { label: "Next day", icon: <PiRocketLaunch size={20} /> },
 };
 
 // pilihan terpilih: yang dipilih pembeli kalau masih ada, kalau tidak -> pilihan pertama (instan / termurah)
@@ -29,7 +30,8 @@ type CourierOptionsProps = {
   onChange: (id: string) => void;
 };
 
-// daftar kurir (Biteship) untuk alamat terpilih: instan / same day / reguler + perkiraan waktu & ongkir
+// daftar kurir untuk alamat terpilih: JNE & J&T (reguler / express) + GoSend & Grab kalau dekat studio.
+// Nama layanan sudah disederhanakan di BE (cargo / trucking tidak ditampilkan)
 export function CourierOptions({ rates, isPending, error, onRetry, selectedId, onChange }: CourierOptionsProps) {
   return (
     <fieldset className="flex flex-col gap-3">

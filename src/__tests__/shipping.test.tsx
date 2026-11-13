@@ -20,7 +20,7 @@ const option = (overrides: Partial<ShippingOption>): ShippingOption => ({
   courierCode: "jne",
   serviceCode: "reg",
   courierName: "JNE",
-  serviceName: "JNE Reguler",
+  serviceName: "JNE Regular",
   type: "REGULAR",
   eta: "2 - 3 days",
   fee: 12000,
@@ -57,9 +57,18 @@ describe("CourierOptions", () => {
     expect(screen.getByText("Rp25.000")).toBeInTheDocument();
   });
 
+  it("JNE Express -> badge Next day; J&T Regular tanpa badge", () => {
+    const express = option({ id: "jne:yes", serviceCode: "yes", serviceName: "JNE Express", type: "EXPRESS", eta: "1 day", fee: 96000 });
+    const jnt = option({ id: "jnt:ez", courierCode: "jnt", courierName: "J&T", serviceCode: "ez", serviceName: "J&T Regular", fee: 36000 });
+    setup({ rates: rates({ options: [jnt, express] }) });
+    expect(screen.getByRole("radio", { name: /JNE Express/ })).toHaveAccessibleName(expect.stringContaining("Next day"));
+    expect(screen.getByRole("radio", { name: /J&T Regular/ })).not.toHaveAccessibleName(expect.stringContaining("Regular Regular"));
+    expect(screen.getAllByText("Next day")).toHaveLength(1);
+  });
+
   it("memilih kurir lain memanggil onChange dengan id-nya", async () => {
     const { user, onChange } = setup();
-    await user.click(screen.getByRole("radio", { name: /JNE Reguler/ }));
+    await user.click(screen.getByRole("radio", { name: /JNE Regular/ }));
     expect(onChange).toHaveBeenCalledWith("jne:reg");
   });
 
@@ -119,7 +128,7 @@ describe("Checkout dengan kurir", () => {
     await waitFor(() => expect(placeButton).toBeEnabled());
     expect(screen.getAllByText("Rp175.000").length).toBeGreaterThan(0);
 
-    await actor.click(screen.getByRole("radio", { name: /JNE Reguler/ }));
+    await actor.click(screen.getByRole("radio", { name: /JNE Regular/ }));
     expect(screen.getAllByText("Rp162.000").length).toBeGreaterThan(0);
 
     await actor.click(placeButton);

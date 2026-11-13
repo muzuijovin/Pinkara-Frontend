@@ -1,5 +1,6 @@
 // GET /shipping/rates: pilihan kurir untuk alamat terpilih (tarif dari Biteship, diurutkan instan dulu)
-export type ShippingRateType = "INSTANT" | "SAME_DAY" | "REGULAR";
+// EXPRESS = besok sampai (JNE YES)
+export type ShippingRateType = "INSTANT" | "SAME_DAY" | "REGULAR" | "EXPRESS";
 
 export type ShippingOption = {
   id: string; // "gojek:instant"
