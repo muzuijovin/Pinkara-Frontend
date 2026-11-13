@@ -15,8 +15,10 @@ import {
   PiSquaresFour,
   PiUser,
 } from "react-icons/pi";
+import { useAdminBadges, type AdminBadgeKey, type AdminBadges } from "./useAdminBadges";
 
-type NavItem = { label: string; href: string; icon: IconType; ready: boolean };
+// badge = kunci angka notifikasi (pesanan baru / custom belum dibalas / pembayaran perlu dicek)
+type NavItem = { label: string; href: string; icon: IconType; ready: boolean; badge?: AdminBadgeKey };
 
 // menu panel admin (PRD §12). ready = halaman sudah dibuat; yang belum tampil "Soon" & tidak bisa diklik
 const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
@@ -24,9 +26,9 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Store",
     items: [
       { label: "Dashboard", href: "/admin", icon: PiGauge, ready: true },
-      { label: "Orders", href: "/admin/orders", icon: PiReceipt, ready: true },
-      { label: "Custom requests", href: "/admin/custom-requests", icon: PiChatsCircle, ready: true },
-      { label: "Payments", href: "/admin/payments", icon: PiCreditCard, ready: true },
+      { label: "Orders", href: "/admin/orders", icon: PiReceipt, ready: true, badge: "orders" },
+      { label: "Custom requests", href: "/admin/custom-requests", icon: PiChatsCircle, ready: true, badge: "customRequests" },
+      { label: "Payments", href: "/admin/payments", icon: PiCreditCard, ready: true, badge: "payments" },
     ],
   },
   {
@@ -53,9 +55,20 @@ const isActive = (pathname: string, href: string) =>
 
 const ALL_ITEMS = NAV_GROUPS.flatMap((group) => group.items);
 
-function NavLink({ item, pathname, compact = false }: { item: NavItem; pathname: string; compact?: boolean }) {
+// arti angka untuk pembaca layar
+const BADGE_LABEL: Record<AdminBadgeKey, string> = {
+  orders: "new paid orders",
+  customRequests: "requests waiting for your reply",
+  payments: "payments to check",
+};
+
+type NavLinkProps = { item: NavItem; pathname: string; badges?: AdminBadges; compact?: boolean };
+
+function NavLink({ item, pathname, badges, compact = false }: NavLinkProps) {
   const { label, href, icon: Icon, ready } = item;
   const active = isActive(pathname, href);
+  // sedang dibuka -> angka disembunyikan (BE juga mencatat menu ini sudah dilihat)
+  const count = item.badge && !active ? (badges?.[item.badge] ?? 0) : 0;
   const base = compact
     ? "flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm"
     : "flex h-11 items-center gap-3 rounded-lg px-3 text-[15px]";
@@ -79,7 +92,15 @@ function NavLink({ item, pathname, compact = false }: { item: NavItem; pathname:
       }`}
     >
       <Icon aria-hidden="true" size={compact ? 18 : 20} />
-      {label}
+      <span className={compact ? undefined : "flex-1"}>{label}</span>
+      {count > 0 && item.badge && (
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-content tabular-nums">
+          <span aria-hidden="true">{count > 99 ? "99+" : count}</span>
+          <span className="sr-only">
+            , {count} {BADGE_LABEL[item.badge]}
+          </span>
+        </span>
+      )}
     </Link>
   );
 }
@@ -87,6 +108,7 @@ function NavLink({ item, pathname, compact = false }: { item: NavItem; pathname:
 // navigasi panel admin: sidebar kiri di desktop (lg ke atas), deretan tab yang bisa digeser di HP/tablet
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { data: badges } = useAdminBadges(pathname);
 
   return (
     <>
@@ -97,7 +119,7 @@ export function AdminSidebar() {
             <div key={group.title} className="flex flex-col gap-1">
               <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">{group.title}</p>
               {group.items.map((item) => (
-                <NavLink key={item.href} item={item} pathname={pathname} />
+                <NavLink key={item.href} item={item} pathname={pathname} badges={badges} />
               ))}
             </div>
           ))}
@@ -108,7 +130,7 @@ export function AdminSidebar() {
       <nav aria-label="Admin navigation" className="border-b border-base-300 bg-base-100 lg:hidden">
         <div className="flex gap-1 overflow-x-auto px-4 py-2 scrollbar-none">
           {ALL_ITEMS.filter((item) => item.ready).map((item) => (
-            <NavLink key={item.href} item={item} pathname={pathname} compact />
+            <NavLink key={item.href} item={item} pathname={pathname} badges={badges} compact />
           ))}
         </div>
       </nav>
