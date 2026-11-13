@@ -10,6 +10,7 @@ import { getErrorMessage } from "@/lib/error.lib";
 import type { Address } from "@/types/profile.type";
 import { useCreateAddress, useUpdateAddress } from "../hooks/useAddresses";
 import { addressSchema } from "@/features/validation/profileSchema";
+import { AreaCombobox } from "@/features/shipping/components/areaCombobox";
 import { LocationPicker } from "@/features/shipping/components/locationPicker";
 
 type AddressFormProps = {
@@ -38,14 +39,16 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
       recipientName: address?.recipientName ?? "",
       recipientPhone: address?.recipientPhone ?? "",
       fullAddress: address?.fullAddress ?? "",
-      city: address?.city ?? "",
-      postalCode: address?.postalCode ?? "",
+      areaId: address?.areaId ?? "",
+      areaName: address?.areaName ?? "",
       isDefault: address?.isDefault ?? isFirstAddress,
       latitude: address?.latitude ?? null,
       longitude: address?.longitude ?? null,
     },
   });
-  const [latitude, longitude] = useWatch({ control, name: ["latitude", "longitude"] });
+  const [latitude, longitude, areaId, areaName] = useWatch({ control, name: ["latitude", "longitude", "areaId", "areaName"] });
+  // alamat lama (sebelum validasi wilayah) -> minta dilengkapi
+  const needsUpdate = Boolean(address) && (!address?.areaId || address?.latitude === null);
   const pin = latitude !== null && longitude !== null ? { latitude, longitude } : null;
 
   const onSuccess = () => {
@@ -64,6 +67,11 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
       className="flex flex-col gap-4"
     >
       {mutation.error && <FormAlert message={getErrorMessage(mutation.error)} />}
+      {needsUpdate && (
+        <p role="status" className="rounded-box bg-warning/15 px-3 py-2.5 text-sm text-ink">
+          Please choose this address&apos;s district from the list and pin it on the map so couriers can find it.
+        </p>
+      )}
 
       <TextField
         id="label"
@@ -94,9 +102,18 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
         />
       </div>
 
+      <AreaCombobox
+        value={areaId ? { id: areaId, name: areaName } : null}
+        onChange={(area) => {
+          setValue("areaId", area?.id ?? "", { shouldDirty: true, shouldValidate: Boolean(area) });
+          setValue("areaName", area?.name ?? "", { shouldDirty: true });
+        }}
+        error={errors.areaId?.message}
+      />
+
       <div className="flex flex-col gap-1.5">
         <label htmlFor="fullAddress" className="text-sm font-medium text-ink">
-          Full address
+          Street address
           <span aria-hidden="true" className="text-danger-text">
             {" "}
             *
@@ -106,7 +123,7 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
           id="fullAddress"
           rows={3}
           autoComplete="street-address"
-          placeholder="Street name, house number, RT/RW, district, landmark"
+          placeholder="Street name, house number, RT/RW, building, landmark"
           aria-required
           aria-invalid={errors.fullAddress ? true : undefined}
           aria-describedby={errors.fullAddress ? "fullAddress-error" : undefined}
@@ -120,31 +137,12 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <TextField
-          id="city"
-          label="City / Regency"
-          autoComplete="address-level2"
-          required
-          error={errors.city?.message}
-          {...register("city")}
-        />
-        <TextField
-          id="postalCode"
-          label="Postal code"
-          inputMode="numeric"
-          autoComplete="postal-code"
-          maxLength={5}
-          required
-          error={errors.postalCode?.message}
-          {...register("postalCode")}
-        />
-      </div>
-
       <LocationPicker
+        required
         value={pin}
+        error={errors.latitude?.message}
         onChange={(next) => {
-          setValue("latitude", next?.latitude ?? null, { shouldDirty: true });
+          setValue("latitude", next?.latitude ?? null, { shouldDirty: true, shouldValidate: Boolean(next) });
           setValue("longitude", next?.longitude ?? null, { shouldDirty: true });
         }}
       />

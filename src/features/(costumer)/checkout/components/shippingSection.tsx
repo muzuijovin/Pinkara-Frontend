@@ -4,6 +4,7 @@ import { formatRupiah } from "@/lib/currency.lib";
 import type { ShippingMethod } from "@/types/order.type";
 import type { Address } from "@/types/profile.type";
 import { OptionCard } from "./optionCard";
+import { formatAddressLine, isAddressReady } from "@/features/shipping/utils/address";
 
 const SHIPPING_COPY: Record<ShippingMethod, { title: string; description: string; icon: React.ReactNode }> = {
   COURIER: {
@@ -95,6 +96,8 @@ export function ShippingSection({
                 name="addressId"
                 value={address.id}
                 checked={addressId === address.id}
+                // alamat lama tanpa wilayah resmi / pin tidak bisa dipakai kirim
+                disabled={!isAddressReady(address)}
                 onChange={onAddressChange}
                 title={
                   <span className="flex flex-wrap items-center gap-2">
@@ -110,7 +113,21 @@ export function ShippingSection({
                     )}
                   </span>
                 }
-                description={`${address.fullAddress}, ${address.city} ${address.postalCode}`}
+                description={
+                  isAddressReady(address) ? (
+                    formatAddressLine(address)
+                  ) : (
+                    <>
+                      {formatAddressLine(address)}
+                      <span className="mt-1 block font-medium text-ink">
+                        Needs a district and map pin.{" "}
+                        <Link href="/profile?tab=addresses" className="text-accent-text underline underline-offset-2">
+                          Update address
+                        </Link>
+                      </span>
+                    </>
+                  )
+                }
               />
             ))}
 

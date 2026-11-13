@@ -18,3 +18,14 @@ export type ShippingRates = {
   fallback: boolean;
   hasPin: boolean; // alamat punya titik lokasi -> kurir instan bisa muncul
 };
+
+// GET /shipping/areas: wilayah resmi (kecamatan) untuk form alamat
+export type Area = {
+  id: string;
+  name: string; // "Klojen, Malang, Jawa Timur. 65111"
+  province: string;
+  city: string;
+  district: string;
+  postalCode: string;
+  deliverable: boolean; // false = di luar Malang Raya
+};

@@ -16,6 +16,7 @@ import { CourierOptions, selectedOption } from "@/features/shipping/components/c
 import { SHIPPING_RATES_KEY, useShippingRates } from "@/features/shipping/hooks/useShippingRates";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAcceptQuotation } from "../../hooks/useCustomRequests";
+import { pickReadyAddress } from "@/features/shipping/utils/address";
 
 type AcceptQuotationDialogProps = {
   request: CustomRequestDetail;
@@ -36,10 +37,7 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
   const [pickedCourierId, setPickedCourierId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("QRIS");
 
-  const addressId =
-    (pickedAddressId && addresses?.some((a) => a.id === pickedAddressId) ? pickedAddressId : null) ??
-    (addresses?.find((a) => a.isDefault) ?? addresses?.[0])?.id ??
-    null;
+  const addressId = pickReadyAddress(addresses, pickedAddressId);
   // pilihan kurir dihitung dari isi penawaran (ukuran kardus) ke alamat terpilih
   const shippingRates = useShippingRates({ addressId, quotationId: quotation.id, enabled: shippingMethod === "COURIER" });
   const courier = shippingMethod === "COURIER" ? selectedOption(shippingRates.data, pickedCourierId) : null;
@@ -49,7 +47,9 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
   const disabledReason = !user?.emailVerifiedAt
     ? "Please verify your email before paying."
     : shippingMethod === "COURIER" && !addressId
-      ? "Add a delivery address first."
+      ? addresses?.length
+        ? "Update your address with its district and map pin first."
+        : "Add a delivery address first."
       : shippingMethod === "COURIER" && !courier
         ? shippingRates.isPending
           ? "Loading delivery options..."

@@ -24,6 +24,7 @@ import { CheckoutSummary } from "./components/checkoutSummary";
 import { PaymentMethodSection } from "./components/paymentMethodSection";
 import { ShippingSection } from "./components/shippingSection";
 import { getCheckoutError, useCheckoutPreview, usePlaceOrder } from "./hooks/useCheckout";
+import { pickReadyAddress } from "@/features/shipping/utils/address";
 
 const NOTE_MAX = 500;
 
@@ -81,10 +82,8 @@ export function CheckoutSection() {
   const [addressError, setAddressError] = useState<string>();
 
   // alamat terpilih: pilihan pembeli, kalau belum memilih -> alamat utama
-  const addressId =
-    (pickedAddressId && addresses?.some((address) => address.id === pickedAddressId) ? pickedAddressId : null) ??
-    (addresses?.find((address) => address.isDefault) ?? addresses?.[0])?.id ??
-    null;
+  // alamat terpilih: pilihan pembeli, kalau belum memilih -> alamat utama (hanya alamat yang sudah lengkap)
+  const addressId = pickReadyAddress(addresses, pickedAddressId);
 
   // pilihan kurir (Biteship) untuk alamat terpilih
   const shippingRates = useShippingRates({ addressId, enabled: shippingMethod === "COURIER" && Boolean(preview) });
@@ -110,7 +109,9 @@ export function CheckoutSection() {
   const disabledReason = !isEmailVerified
     ? "Verify your email to place an order."
     : shippingMethod === "COURIER" && !addressId
-      ? "Add a delivery address first."
+      ? addresses?.length
+        ? "Update your address with its district and map pin first."
+        : "Add a delivery address first."
       : shippingMethod === "COURIER" && !courier
         ? shippingRates.isPending
           ? "Loading delivery options..."
@@ -161,6 +162,10 @@ export function CheckoutSection() {
               toast.error(getErrorMessage(err));
               queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
               router.push("/cart");
+              return;
+            case "ADDRESS_INCOMPLETE":
+              setAddressError("This address needs a district and map pin. Please update it in your profile.");
+              queryClient.invalidateQueries({ queryKey: ADDRESSES_QUERY_KEY });
               return;
             case "ADDRESS_NOT_FOUND":
               setAddressError("This address is no longer available. Please choose another one.");

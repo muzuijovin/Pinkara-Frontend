@@ -34,22 +34,21 @@ export const addressSchema = z.object({
     .trim()
     .min(1, "Recipient phone number is required")
     .refine((value) => PHONE_REGEX.test(normalizePhone(value)), PHONE_MESSAGE),
+  // detail jalan, no. rumah, RT/RW, patokan. Kecamatan/kota/kode pos dari wilayah yang dipilih
   fullAddress: z
     .string()
     .trim()
-    .min(10, "Full address must be at least 10 characters")
-    .max(500, "Full address must be at most 500 characters"),
-  city: z
-    .string()
-    .trim()
-    .min(2, "City must be at least 2 characters")
-    .max(100, "City must be at most 100 characters"),
-  postalCode: z.string().trim().regex(/^[0-9]{5}$/, "Postal code must be 5 digits"),
+    .min(10, "Street address must be at least 10 characters")
+    .max(500, "Street address must be at most 500 characters"),
+  // wilayah resmi dari daftar (GET /shipping/areas): tidak bisa diketik bebas
+  areaId: z.string().min(1, "Please choose your district from the list"),
+  areaName: z.string(),
   isDefault: z.boolean(),
-  // titik lokasi dari peta (opsional), dipakai untuk tarif kurir instan
+  // pin lokasi wajib (dicek BE berada di area layanan Malang Raya)
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
-});
+})
+  .refine((data) => data.latitude !== null && data.longitude !== null, { message: "Please pin the location on the map", path: ["latitude"] });
 
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type AddressInput = z.infer<typeof addressSchema>;

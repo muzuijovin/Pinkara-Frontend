@@ -1,13 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { PiMapPin, PiMapPinLine, PiPencilSimple, PiPlus, PiStar, PiTrash } from "react-icons/pi";
+import { PiMapPin, PiMapPinLine, PiPencilSimple, PiPlus, PiStar, PiTrash, PiWarningCircle } from "react-icons/pi";
 import { toast } from "react-toastify";
 import { FormAlert } from "@/components/form/formAlert";
 import { getErrorMessage } from "@/lib/error.lib";
 import type { Address } from "@/types/profile.type";
 import { useAddresses, useDeleteAddress, useSetDefaultAddress } from "../hooks/useAddresses";
 import { AddressForm } from "./addressForm";
+import { formatAddressLine, isAddressReady } from "@/features/shipping/utils/address";
 
 // sama dengan batas di BE (addresses.service.ts)
 const MAX_ADDRESSES = 10;
@@ -97,22 +98,28 @@ export function AddressList() {
                 {address.isDefault && (
                   <span className="badge badge-sm border-none bg-primary text-primary-content">Default</span>
                 )}
-                {/* titik peta = kurir instan (GoSend / Grab) bisa dipilih saat checkout */}
-                {address.latitude !== null && address.longitude !== null ? (
+                {/* alamat lama tanpa wilayah resmi / pin: tidak bisa dipakai checkout sampai diperbarui */}
+                {isAddressReady(address) ? (
                   <span className="badge badge-sm gap-1 border-none bg-success-soft text-success-text">
                     <PiMapPin aria-hidden="true" size={12} />
                     Pinned
                   </span>
                 ) : (
-                  <span className="badge badge-sm border-none bg-surface-sunken text-ink-muted">No map pin</span>
+                  <span className="badge badge-sm gap-1 border-none bg-warning/20 text-ink">
+                    <PiWarningCircle aria-hidden="true" size={12} />
+                    Needs update
+                  </span>
                 )}
               </div>
               <p className="mt-1 text-sm font-medium text-ink">
                 {address.recipientName} <span className="font-normal text-ink-muted">· {address.recipientPhone}</span>
               </p>
               <p className="mt-1 wrap-break-word text-sm text-ink-muted">
-                {address.fullAddress}, {address.city} {address.postalCode}
+                {formatAddressLine(address)}
               </p>
+              {!isAddressReady(address) && (
+                <p className="mt-1 text-xs text-ink-muted">Edit this address to choose its district and pin it on the map before using it for delivery.</p>
+              )}
 
               <div className="mt-3 flex flex-wrap gap-1">
                 {!address.isDefault && (

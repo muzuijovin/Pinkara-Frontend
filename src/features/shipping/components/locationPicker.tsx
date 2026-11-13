@@ -16,11 +16,13 @@ const round = (value: number) => Math.round(value * 1e6) / 1e6;
 type LocationPickerProps = {
   value: LatLng | null;
   onChange: (value: LatLng | null) => void;
+  required?: boolean; // form alamat: pin wajib supaya kurir bisa menemukan alamat
+  error?: string;
 };
 
 // pin lokasi alamat (opsional): dipakai untuk tarif kurir instan GoSend / Grab yang dihitung dari jarak.
 // Alternatif tanpa menyeret peta: tombol "Use my current location"
-export function LocationPicker({ value, onChange }: LocationPickerProps) {
+export function LocationPicker({ value, onChange, required = false, error: fieldError }: LocationPickerProps) {
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -47,9 +49,13 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-1.5 text-sm font-medium text-ink">Pin location (optional)</legend>
+      <legend className="mb-1.5 text-sm font-medium text-ink">
+        Pin location
+        {required ? <span aria-hidden="true" className="text-danger-text"> *</span> : " (optional)"}
+      </legend>
       <p id="pin-hint" className="text-xs text-ink-muted">
-        Tap the map or drag the pin to the exact spot. A pin unlocks same-day couriers like GoSend and Grab.
+        Tap the map or drag the pin to the exact delivery spot. Couriers use it to find the address, and it unlocks same-day couriers like
+        GoSend and Grab.
       </p>
       <div className="relative h-56 overflow-hidden rounded-box border border-base-300 sm:h-64">
         <LocationMap value={value} onChange={pick} />
@@ -73,12 +79,12 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
             Pinned at {value.latitude.toFixed(5)}, {value.longitude.toFixed(5)}
           </>
         ) : (
-          "No pin yet. Regular couriers are still available without one."
+          required ? "No pin yet." : "No pin yet. Regular couriers are still available without one."
         )}
       </p>
-      {error && (
+      {(error ?? fieldError) && (
         <p role="alert" className="text-xs text-danger-text">
-          {error}
+          {error ?? fieldError}
         </p>
       )}
     </fieldset>
