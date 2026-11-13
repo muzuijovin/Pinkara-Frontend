@@ -47,6 +47,19 @@ export function useSimulatePayment(code: string) {
   });
 }
 
+// POST /payments/:id/refresh -> KHUSUS Midtrans sandbox: cek status sekarang setelah bayar di simulator
+export function useRefreshSandboxPayment(code: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (paymentId: string) => {
+      const res = await axiosInstance.post<ApiResponse<OrderDetail>>(`/payments/${paymentId}/refresh`);
+      return res.data.data;
+    },
+    onSuccess: (order) => queryClient.setQueryData(orderQueryKey(code), order),
+  });
+}
+
 export type OrdersParams = { status?: OrderTab; page: number };
 
 // GET /orders -> Pesanan Saya (terbaru dulu), 10 per halaman
