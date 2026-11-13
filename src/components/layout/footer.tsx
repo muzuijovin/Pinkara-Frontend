@@ -25,8 +25,9 @@ const LINK_GROUPS = [
   },
 ];
 
+// Instagram hanya tampil kalau username-nya sudah diisi di src/config/site.ts
 const SOCIALS: { label: string; href: string; icon: IconType; external: boolean }[] = [
-  { label: "Instagram", href: instagramUrl, icon: PiInstagramLogo, external: true },
+  ...(instagramUrl ? [{ label: "Instagram", href: instagramUrl, icon: PiInstagramLogo, external: true }] : []),
   { label: "WhatsApp", href: whatsappUrl, icon: PiWhatsappLogo, external: true },
   { label: "Email", href: emailUrl, icon: PiEnvelopeSimple, external: false },
 ];

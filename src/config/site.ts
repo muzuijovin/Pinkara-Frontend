@@ -1,5 +1,6 @@
 // ===== DATA STUDIO (dipakai footer, About, Privacy Policy) =====
 // GANTI nilai bertanda PLACEHOLDER dengan data asli Pinkara sebelum rilis.
+// Instagram kosong = tombol & link Instagram disembunyikan otomatis.
 
 export const SITE = {
   name: "Pinkara Studio",
@@ -7,21 +8,22 @@ export const SITE = {
   // alamat studio untuk ambil sendiri (PLACEHOLDER)
   address: "Malang, East Java, Indonesia",
 
-  // Instagram: username tanpa @ (PLACEHOLDER)
-  instagram: "pinkara.studio",
-  // WhatsApp: format internasional tanpa + / spasi, mis. 6281234567890 (PLACEHOLDER)
-  whatsapp: "6281234567890",
-  // email untuk pertanyaan pelanggan (PLACEHOLDER)
-  email: "hello@pinkara.id",
+  // Instagram: username tanpa @, mis. "pinkara.studio" (kosong = belum ada, tidak ditampilkan)
+  instagram: "",
+  // WhatsApp: format internasional tanpa + / spasi (+62 819-3512-5149)
+  whatsapp: "6281935125149",
+  // email untuk pertanyaan pelanggan
+  email: "pinkarastudios@gmail.com",
 
   // jam buka studio (WIB)
   hours: [
     { day: "Mon – Sat", time: "08:00 – 20:00" },
     { day: "Sunday", time: "09:00 – 17:00" },
   ],
-} as const;
+};
 
-export const instagramUrl = `https://instagram.com/${SITE.instagram}`;
+// null selama username Instagram belum diisi -> link Instagram tidak ditampilkan
+export const instagramUrl: string | null = SITE.instagram ? `https://instagram.com/${SITE.instagram}` : null;
 export const whatsappUrl = `https://wa.me/${SITE.whatsapp}`;
 export const emailUrl = `mailto:${SITE.email}`;
 
