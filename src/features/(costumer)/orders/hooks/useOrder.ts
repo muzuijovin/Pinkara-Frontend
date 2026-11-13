@@ -76,3 +76,34 @@ export function useOrders(params: OrdersParams) {
     placeholderData: keepPreviousData,
   });
 }
+
+// POST /orders/:code/cancel -> pembeli membatalkan pesanan yang sudah dibayar (uang kembali sebagian)
+export function useCancelMyOrder(code: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (reason: string) => {
+      const res = await axiosInstance.post<ApiResponse<OrderDetail>>(`/orders/${code}/cancel`, { reason });
+      return res.data.data;
+    },
+    onSuccess: (order) => {
+      queryClient.setQueryData(orderQueryKey(code), order);
+      return queryClient.invalidateQueries({ queryKey: ["orders", "list"] });
+    },
+  });
+}
+
+export type RefundAccountBody = { bankName: string; accountNumber: string; accountName: string };
+
+// PUT /orders/:code/refund-account -> rekening tujuan refund
+export function useSaveRefundAccount(code: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: RefundAccountBody) => {
+      const res = await axiosInstance.put<ApiResponse<OrderDetail>>(`/orders/${code}/refund-account`, body);
+      return res.data.data;
+    },
+    onSuccess: (order) => queryClient.setQueryData(orderQueryKey(code), order),
+  });
+}

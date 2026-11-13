@@ -14,7 +14,7 @@ const desktopNav = () => within(screen.getByRole("complementary", { name: "Admin
 
 beforeEach(() => {
   nav.pathname = "/admin";
-  api.get.mockResolvedValue(apiResponse({ orders: 3, customRequests: 120, payments: 0 }));
+  api.get.mockResolvedValue(apiResponse({ orders: 3, orderRefunds: 2, customRequests: 120, payments: 0 }));
 });
 
 describe("AdminSidebar – angka notifikasi", () => {
@@ -27,6 +27,13 @@ describe("AdminSidebar – angka notifikasi", () => {
     expect(api.get).toHaveBeenCalledWith("/admin/dashboard/badges");
   });
 
+  it("Orders: angka merah terpisah untuk pembatalan & refund", async () => {
+    renderWithQuery(<AdminSidebar />);
+    const orders = await desktopNav().findByRole("link", { name: /Orders, 3 new paid orders, 2 cancelled orders to refund/ });
+    const refundBadge = within(orders).getByText("2").parentElement!;
+    expect(refundBadge).toHaveClass("bg-danger-text");
+  });
+
   it("menu yang sedang dibuka -> angkanya disembunyikan", async () => {
     nav.pathname = "/admin/orders";
     renderWithQuery(<AdminSidebar />);
@@ -34,6 +41,7 @@ describe("AdminSidebar – angka notifikasi", () => {
     const orders = desktopNav().getByRole("link", { name: "Orders" });
     expect(orders).toHaveAttribute("aria-current", "page");
     expect(within(orders).queryByText("3")).not.toBeInTheDocument();
+    expect(within(orders).queryByText("2")).not.toBeInTheDocument();
   });
 
   it("gagal memuat angka -> menu tetap tampil tanpa angka", async () => {

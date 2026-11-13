@@ -11,6 +11,7 @@ import { formatRupiah } from "@/lib/currency.lib";
 import { formatDateTimeWIB } from "@/lib/datetime.lib";
 import { getErrorMessage } from "@/lib/error.lib";
 import type { AdminOrderDetail as AdminOrderDetailData, PaymentStatus } from "@/types/order.type";
+import { CancellationCard } from "./components/cancellationCard";
 import { OrderActions } from "./components/orderActions";
 import { PackingWorksheet } from "./components/packingWorksheet";
 import { ProgressPhotos } from "./components/progressPhotos";
@@ -211,12 +212,10 @@ export function AdminOrderDetail() {
         {order.paidAt && ` · Paid ${formatDateTimeWIB(order.paidAt)}`}
         {order.status === "MENUNGGU_PEMBAYARAN" && ` · Pay before ${formatDateTimeWIB(order.expiresAt)}`}
       </p>
-      {order.cancelReason && (
-        <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger-text">Cancelled: {order.cancelReason}</p>
-      )}
 
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-[1fr_360px]">
         <div className="flex min-w-0 flex-col gap-6">
+          <CancellationCard order={order} />
           <PackingWorksheet order={order} />
           <ProgressPhotos order={order} />
           <History order={order} />

@@ -111,6 +111,22 @@ export type OrderDetail = {
   serverTime: string; // jam server, untuk hitung mundur yang akurat
   promotionName: string | null;
   payment: OrderPayment | null;
+  // pembatalan & refund
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  cancelledBy: "CUSTOMER" | "SELLER" | null; // null = sistem (stok habis, bayar dobel, dll.)
+  refundDue: number | null; // nominal yang harus dikembalikan (null = total penuh)
+  refundAmount: number | null; // nominal yang sudah dikembalikan
+  refundedAt: string | null;
+  refundProofUrl: string | null; // bukti transfer refund dari admin
+  refundBankName: string | null; // rekening tujuan refund dari pembeli
+  refundAccountNumber: string | null;
+  refundAccountName: string | null;
+  refundAccountAt: string | null;
+  canCancel: boolean; // pembeli boleh membatalkan (sudah dibayar, belum diproduksi / dikirim)
+  cancelRefundPercent: number; // dibatalkan pembeli -> uang kembali sekian persen
+  cancelRefundAmount: number;
+  refundExpected: number | null; // nominal yang akan dikembalikan saat menunggu refund
   items: {
     id: string;
     productName: string;
@@ -156,7 +172,10 @@ export type AdminOrderListItem = Omit<OrderListItem, "firstItem"> & {
 export type AdminOrderStatusCounts = Partial<Record<OrderStatus, number>>;
 
 // GET /admin/orders/:code (+ semua aksi admin)
-export type AdminOrderDetail = Omit<OrderDetail, "serverTime" | "payment" | "items" | "statusHistory"> & {
+export type AdminOrderDetail = Omit<
+  OrderDetail,
+  "serverTime" | "payment" | "items" | "statusHistory" | "canCancel" | "cancelRefundPercent" | "cancelRefundAmount" | "refundExpected"
+> & {
   shipCourierCode: string | null;
   shipLatitude: number | null; // titik lokasi tujuan (buka di Google Maps saat memesan kurir)
   shipLongitude: number | null;

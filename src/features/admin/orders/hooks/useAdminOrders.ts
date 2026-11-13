@@ -74,10 +74,14 @@ export function useCancelOrder(code: string) {
   });
 }
 
-// POST /admin/orders/:code/refund
+// POST /admin/orders/:code/refund (multipart: amount, reason, proof opsional = bukti transfer refund)
 export function useRefundOrder(code: string) {
-  return useAdminOrderAction(code, async (body: { amount: number; reason: string }) => {
-    const res = await axiosInstance.post<ApiResponse<AdminOrderDetail>>(`/admin/orders/${code}/refund`, body);
+  return useAdminOrderAction(code, async ({ amount, reason, proof }: { amount: number; reason: string; proof?: File | null }) => {
+    const form = new FormData();
+    form.append("amount", String(amount));
+    form.append("reason", reason);
+    if (proof) form.append("proof", proof);
+    const res = await axiosInstance.post<ApiResponse<AdminOrderDetail>>(`/admin/orders/${code}/refund`, form);
     return res.data.data;
   });
 }

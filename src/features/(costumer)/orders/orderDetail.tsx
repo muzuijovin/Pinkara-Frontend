@@ -10,7 +10,9 @@ import { PageLoader } from "@/components/ui/pageLoader";
 import { formatDateTimeWIB } from "@/lib/datetime.lib";
 import { getErrorMessage } from "@/lib/error.lib";
 import type { OrderDetail as OrderDetailData } from "@/types/order.type";
+import { CancelOrderButton } from "./components/cancelOrderDialog";
 import { OrderSummaryCard } from "./components/orderSummaryCard";
+import { RefundPanel } from "./components/refundPanel";
 import { ORDER_STATUS, OrderStatusBadge } from "./constants/orderStatus";
 import { useOrder } from "./hooks/useOrder";
 
@@ -27,8 +29,15 @@ const STATUS_MESSAGE: Partial<Record<OrderDetailData["status"], string>> = {
   KEDALUWARSA: "The payment time ran out, so this order was cancelled automatically.",
   DIBATALKAN: "This order was cancelled.",
   PERLU_REFUND: "We received your payment, but we couldn't fulfil this order. Our team will refund you.",
+  // PERLU_REFUND karena dibatalkan pembeli: lihat statusMessage()
   DIREFUND: "Your payment has been refunded.",
 };
+
+// pesan status; menunggu refund karena dibatalkan pembeli punya pesan sendiri
+const statusMessage = (order: OrderDetailData) =>
+  order.status === "PERLU_REFUND" && order.cancelledBy === "CUSTOMER"
+    ? "You cancelled this order. We'll send your refund once you've added your bank details below."
+    : STATUS_MESSAGE[order.status];
 
 // riwayat status (PRD §11): dari order_status_history, terbaru di atas
 function StatusTimeline({ history }: { history: OrderDetailData["statusHistory"] }) {
@@ -163,7 +172,7 @@ export function OrderDetail() {
         <div className="flex min-w-0 flex-col gap-6">
           <section aria-label="Order status" className="card border border-base-300 bg-base-100">
             <div className="card-body gap-4 p-5 sm:p-6">
-              <p className="text-sm text-ink">{STATUS_MESSAGE[order.status]}</p>
+              <p className="text-sm text-ink">{statusMessage(order)}</p>
 
               {isAwaitingPayment && (
                 <div className="flex flex-col gap-3 rounded-box bg-warning/15 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -185,8 +194,12 @@ export function OrderDetail() {
                   </div>
                 </div>
               )}
+
+              {order.canCancel && <CancelOrderButton order={order} />}
             </div>
           </section>
+
+          {(order.status === "PERLU_REFUND" || order.status === "DIREFUND") && <RefundPanel order={order} />}
 
           {order.progressPhotos.length > 0 && (
             <section aria-labelledby="progress-title" className="card border border-base-300 bg-base-100">
