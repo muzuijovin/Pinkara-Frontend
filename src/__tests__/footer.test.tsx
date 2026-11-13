@@ -8,14 +8,16 @@ import { BlogList } from "@/features/(public)/blog/blogList";
 
 // TES FOOTER, BLOG & DATA KONTAK
 describe("Footer", () => {
-  it("sosial media: Instagram, WhatsApp (tab baru) & email dengan label", () => {
+  it("kontak: WhatsApp & email toko; Instagram disembunyikan selama belum diisi", () => {
     render(<Footer />);
     const socials = within(screen.getByRole("list", { name: "Follow and contact us" }));
-    const instagram = socials.getByRole("link", { name: "Instagram (opens in a new tab)" });
-    expect(instagram).toHaveAttribute("href", expect.stringMatching(/^https:\/\/instagram\.com\//));
-    expect(instagram).toHaveAttribute("rel", "noopener noreferrer");
-    expect(socials.getByRole("link", { name: "WhatsApp (opens in a new tab)" })).toHaveAttribute("href", expect.stringMatching(/^https:\/\/wa\.me\/62\d+$/));
-    expect(socials.getByRole("link", { name: "Email" })).toHaveAttribute("href", expect.stringMatching(/^mailto:/));
+    expect(socials.queryByRole("link", { name: /instagram/i })).not.toBeInTheDocument();
+    const whatsapp = socials.getByRole("link", { name: "WhatsApp (opens in a new tab)" });
+    expect(whatsapp).toHaveAttribute("href", "https://wa.me/6281935125149");
+    expect(whatsapp).toHaveAttribute("rel", "noopener noreferrer");
+    expect(socials.getByRole("link", { name: "Email" })).toHaveAttribute("href", "mailto:pinkarastudios@gmail.com");
+    expect(screen.getByText("0819-3512-5149")).toBeInTheDocument();
+    expect(screen.getByText("pinkarastudios@gmail.com")).toBeInTheDocument();
   });
 
   it("menu: About us, Blog, Privacy policy & halaman belanja mengarah ke halaman yang ada", () => {

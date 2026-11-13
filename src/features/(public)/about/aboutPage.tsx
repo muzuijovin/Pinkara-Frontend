@@ -99,11 +99,13 @@ export function AboutPage() {
               Chat on WhatsApp
               <span className="sr-only">(opens in a new tab)</span>
             </a>
-            <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-primary h-12 gap-2 px-5">
-              <PiInstagramLogo aria-hidden="true" size={20} />
-              Instagram
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
+            {instagramUrl && (
+              <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-primary h-12 gap-2 px-5">
+                <PiInstagramLogo aria-hidden="true" size={20} />
+                Instagram
+                <span className="sr-only">(opens in a new tab)</span>
+              </a>
+            )}
           </div>
         </div>
       </section>
