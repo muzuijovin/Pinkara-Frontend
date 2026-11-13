@@ -8,12 +8,14 @@ import { OptionCard } from "@/features/(costumer)/checkout/components/optionCard
 import { getErrorMessage } from "@/lib/error.lib";
 import type { OrderDetail, VaBank } from "@/types/order.type";
 import { useCreatePayment, useSimulatePayment } from "../hooks/useOrder";
-import { BANKS, bankLabel, copyText } from "../utils/payment";
+import { bankLabel, copyText } from "../utils/payment";
+import { BankPicker } from "./bankPicker";
 import { SandboxTestPanel } from "./sandboxTestPanel";
 
 type Method = "QRIS" | "VIRTUAL_ACCOUNT";
 
-// pilih metode (QRIS / VA + bank) lalu buat tagihan. Dipakai juga untuk "ganti metode bayar" (PRD §14)
+// pilih metode (QRIS / VA + bank) lalu buat tagihan. Biasanya tagihan sudah dibuat langsung saat checkout;
+// ini dipakai untuk "ganti metode bayar" (PRD §14), tagihan kedaluwarsa, atau kalau pembuatan tagihan saat checkout gagal
 function MethodChooser({ order, onDone }: { order: OrderDetail; onDone?: () => void }) {
   const { mutate: createPayment, isPending } = useCreatePayment(order.code);
   const [method, setMethod] = useState<Method>(order.paymentMethod === "VIRTUAL_ACCOUNT" ? "VIRTUAL_ACCOUNT" : "QRIS");
@@ -52,31 +54,7 @@ function MethodChooser({ order, onDone }: { order: OrderDetail; onDone?: () => v
         />
       </fieldset>
 
-      {method === "VIRTUAL_ACCOUNT" && (
-        <fieldset className="flex flex-col gap-2">
-          <legend className="mb-2 text-sm font-semibold text-ink">Choose your bank</legend>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {BANKS.map((item) => (
-              <label
-                key={item.value}
-                className={`flex h-11 cursor-pointer items-center justify-center rounded-box border text-sm font-semibold transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary ${
-                  bank === item.value ? "border-primary bg-accent-soft/30 text-accent-text" : "border-base-300 text-ink hover:border-primary/50"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="va-bank"
-                  value={item.value}
-                  checked={bank === item.value}
-                  onChange={() => setBank(item.value)}
-                  className="sr-only"
-                />
-                {item.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      )}
+      {method === "VIRTUAL_ACCOUNT" && <BankPicker name="va-bank" value={bank} onChange={setBank} />}
 
       <button type="button" disabled={isPending} onClick={submit} className="btn btn-primary h-12 w-full text-[15px]">
         {isPending && <span aria-hidden="true" className="loading loading-spinner loading-sm" />}

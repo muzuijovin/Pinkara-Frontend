@@ -3,7 +3,8 @@ import { orderQueryKey } from "@/features/(costumer)/orders/hooks/useOrder";
 import { axiosInstance } from "@/lib/axios-instance.lib";
 import type { ApiListResponse, ApiResponse, PaginationMeta } from "@/types/api-response.type";
 import type { CustomRequestDetail, CustomRequestListItem, CustomRequestStatus } from "@/types/customRequest.type";
-import type { OrderDetail, PaymentMethod, ShippingMethod } from "@/types/order.type";
+import type { OrderDetail, PaymentMethod, ShippingMethod, VaBank } from "@/types/order.type";
+import { createPaymentForNewOrder } from "@/features/(costumer)/orders/utils/payment";
 
 export const customRequestKey = (code: string) => ["custom-requests", code] as const;
 
@@ -114,16 +115,17 @@ export type AcceptQuotationVariables = {
   addressId?: string;
   courier?: { courierCode: string; serviceCode: string };
   paymentMethod: PaymentMethod;
+  vaBank: VaBank; // dipakai kalau paymentMethod VIRTUAL_ACCOUNT (tidak dikirim ke endpoint accept)
   expectedTotal: number;
 };
 
-// POST /custom-requests/:code/quotations/:id/accept -> pesanan CUSTOM dibuat, lanjut ke halaman bayar
+// POST /custom-requests/:code/quotations/:id/accept -> pesanan CUSTOM dibuat, tagihan langsung dibuat, lanjut ke halaman bayar
 export function useAcceptQuotation(code: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ quotationId, ...body }: AcceptQuotationVariables) => {
+    mutationFn: async ({ quotationId, vaBank, ...body }: AcceptQuotationVariables) => {
       const res = await axiosInstance.post<ApiResponse<OrderDetail>>(`/custom-requests/${code}/quotations/${quotationId}/accept`, body);
-      return res.data.data;
+      return createPaymentForNewOrder(res.data.data, body.paymentMethod, vaBank);
     },
     onSuccess: (order) => {
       queryClient.setQueryData(orderQueryKey(order.code), order);

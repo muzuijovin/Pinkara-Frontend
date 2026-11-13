@@ -139,6 +139,51 @@ describe("Checkout dengan kurir", () => {
     await waitFor(() => expect(nav.replace).toHaveBeenCalledWith("/orders/PNK-261113-AAAA/payment"));
   });
 
+  it("bayar langsung: VA + bank dipilih di checkout -> pesanan dibuat lalu tagihan langsung dibuat", async () => {
+    const base = api.get.getMockImplementation()!;
+    api.get.mockImplementation(async (url: string, config?: { params?: Record<string, unknown> }) =>
+      url === "/orders/checkout"
+        ? apiResponse({ ...preview, paymentOptions: [{ method: "QRIS", expiresInMinutes: 15 }, { method: "VIRTUAL_ACCOUNT", expiresInMinutes: 1440 }] })
+        : base(url, config),
+    );
+    api.post.mockImplementation(async (url: string) =>
+      url === "/orders" ? apiResponse({ code: "PNK-261113-CCCC", payment: null }) : apiResponse({ code: "PNK-261113-CCCC", payment: { id: "pay-1" } }),
+    );
+    const { user: actor } = renderWithQuery(<CheckoutSection />);
+    await screen.findByText("GoSend Instant");
+
+    expect(screen.queryByRole("group", { name: "Choose your bank" })).not.toBeInTheDocument();
+    await actor.click(screen.getByRole("radio", { name: /virtual account/i }));
+    await actor.click(within(screen.getByRole("group", { name: "Choose your bank" })).getByRole("radio", { name: "BNI" }));
+    const placeButton = screen.getByRole("button", { name: /place order/i });
+    await waitFor(() => expect(placeButton).toBeEnabled());
+    await actor.click(placeButton);
+
+    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith("/orders/PNK-261113-CCCC/payment"));
+    const [orderCall, paymentCall] = api.post.mock.calls as [string, Record<string, unknown>][];
+    expect(orderCall[0]).toBe("/orders");
+    expect(orderCall[1]).toMatchObject({ paymentMethod: "VIRTUAL_ACCOUNT" });
+    expect(orderCall[1]).not.toHaveProperty("vaBank");
+    expect(paymentCall).toEqual(["/orders/PNK-261113-CCCC/payments", { method: "VIRTUAL_ACCOUNT", bank: "bni" }]);
+    expect(toast.info).not.toHaveBeenCalled();
+  });
+
+  it("bayar langsung gagal (gateway gangguan) -> pesanan tetap jadi, info pilih metode di halaman bayar", async () => {
+    api.post.mockImplementation(async (url: string) => {
+      if (url === "/orders") return apiResponse({ code: "PNK-261113-DDDD", payment: null });
+      throw new AxiosError("Bad gateway", "ERR", { headers: new AxiosHeaders() });
+    });
+    const { user: actor } = renderWithQuery(<CheckoutSection />);
+    await screen.findByText("GoSend Instant");
+    const placeButton = screen.getByRole("button", { name: /place order/i });
+    await waitFor(() => expect(placeButton).toBeEnabled());
+    await actor.click(placeButton);
+
+    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith("/orders/PNK-261113-DDDD/payment"));
+    expect(api.post).toHaveBeenLastCalledWith("/orders/PNK-261113-DDDD/payments", { method: "QRIS", bank: undefined });
+    expect(toast.info).toHaveBeenCalledWith(expect.stringContaining("Choose how to pay"));
+  });
+
   it("ambil sendiri -> tanpa kurir & tanpa ongkir", async () => {
     api.post.mockResolvedValue(apiResponse({ code: "PNK-261113-BBBB" }));
     const { user: actor } = renderWithQuery(<CheckoutSection />);

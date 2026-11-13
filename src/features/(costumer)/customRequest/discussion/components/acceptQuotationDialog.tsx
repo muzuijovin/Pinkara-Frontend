@@ -11,7 +11,7 @@ import { useSession } from "@/features/auth/hooks/useSession";
 import { formatRupiah } from "@/lib/currency.lib";
 import { getErrorMessage } from "@/lib/error.lib";
 import type { CustomRequestDetail, Quotation } from "@/types/customRequest.type";
-import type { PaymentMethod, ShippingMethod } from "@/types/order.type";
+import type { PaymentMethod, ShippingMethod, VaBank } from "@/types/order.type";
 import { CourierOptions, selectedOption } from "@/features/shipping/components/courierOptions";
 import { SHIPPING_RATES_KEY, useShippingRates } from "@/features/shipping/hooks/useShippingRates";
 import { useQueryClient } from "@tanstack/react-query";
@@ -36,6 +36,7 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
   const [pickedAddressId, setPickedAddressId] = useState<string | null>(null);
   const [pickedCourierId, setPickedCourierId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("QRIS");
+  const [vaBank, setVaBank] = useState<VaBank>("bca");
 
   const addressId = pickReadyAddress(addresses, pickedAddressId);
   // pilihan kurir dihitung dari isi penawaran (ukuran kardus) ke alamat terpilih
@@ -65,11 +66,14 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
         addressId: shippingMethod === "COURIER" ? (addressId ?? undefined) : undefined,
         courier: courier ? { courierCode: courier.courierCode, serviceCode: courier.serviceCode } : undefined,
         paymentMethod,
+        vaBank,
         expectedTotal: total,
       },
       {
         onSuccess: (order) => {
           toast.success("Quote accepted! Complete your payment to start production.");
+          // tagihan gagal dibuat (gateway gangguan) -> halaman bayar menampilkan pilihan metode untuk dicoba lagi
+          if (!order.payment) toast.info("We couldn't prepare your payment yet. Choose how to pay on the next page to try again.");
           router.push(`/orders/${order.code}/payment`);
         },
         onError: (error) => {
@@ -124,7 +128,13 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
               />
             )}
           </ShippingSection>
-          <PaymentMethodSection options={request.paymentOptions} method={paymentMethod} onChange={setPaymentMethod} />
+          <PaymentMethodSection
+            options={request.paymentOptions}
+            method={paymentMethod}
+            onChange={setPaymentMethod}
+            bank={vaBank}
+            onBankChange={setVaBank}
+          />
         </div>
 
         <footer className="flex flex-col gap-3 border-t border-base-300 bg-base-100 px-5 py-4">
