@@ -44,7 +44,7 @@ export const addressSchema = z.object({
   areaId: z.string().min(1, "Please choose your district from the list"),
   areaName: z.string(),
   isDefault: z.boolean(),
-  // pin lokasi wajib (dicek BE berada di area layanan Malang Raya)
+  // pin lokasi wajib (dicek BE berada di Indonesia)
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
 })

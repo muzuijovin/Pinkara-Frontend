@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -22,8 +22,8 @@ vi.mock("@/features/shipping/components/locationMap", () => ({
   ),
 }));
 
-const KLOJEN: Area = { id: "MOCK-KLOJEN-65111", name: "Klojen, Malang, Jawa Timur. 65111", province: "Jawa Timur", city: "Malang", district: "Klojen", postalCode: "65111", deliverable: true };
-const GUBENG: Area = { id: "MOCK-GUBENG-60281", name: "Gubeng, Surabaya, Jawa Timur. 60281", province: "Jawa Timur", city: "Surabaya", district: "Gubeng", postalCode: "60281", deliverable: false };
+const KLOJEN: Area = { id: "MOCK-KLOJEN-65111", name: "Klojen, Malang, Jawa Timur. 65111", province: "Jawa Timur", city: "Malang", district: "Klojen", postalCode: "65111" };
+const DEPOK: Area = { id: "MOCK-CIPAYUNG-16438", name: "Cipayung, Depok, Jawa Barat. 16438", province: "Jawa Barat", city: "Depok", district: "Cipayung", postalCode: "16438" };
 
 const address = (overrides: Partial<Address> = {}): Address => ({
   id: "a1",
@@ -47,7 +47,7 @@ const address = (overrides: Partial<Address> = {}): Address => ({
 
 beforeEach(() => {
   api.get.mockImplementation(async (url: string, config?: { params?: { input?: string } }) =>
-    url === "/shipping/areas" ? apiResponse([KLOJEN, GUBENG].filter((area) => area.name.toLowerCase().includes(String(config?.params?.input).toLowerCase()))) : apiResponse([]),
+    url === "/shipping/areas" ? apiResponse([KLOJEN, DEPOK].filter((area) => area.name.toLowerCase().includes(String(config?.params?.input).toLowerCase()))) : apiResponse([]),
   );
   api.post.mockResolvedValue(apiResponse(address()));
   api.patch.mockResolvedValue(apiResponse(address()));
@@ -105,15 +105,14 @@ describe("AreaCombobox", () => {
     expect(screen.getByRole("combobox")).toBeInTheDocument();
   });
 
-  it("wilayah di luar Malang Raya tampil tapi tidak bisa dipilih", async () => {
+  it("wilayah luar Malang (Depok) bisa dipilih: kirim seluruh Indonesia", async () => {
     const onPick = vi.fn();
     const { user } = renderWithQuery(<Harness onPick={onPick} />);
-    await user.type(screen.getByRole("combobox"), "gubeng");
-    const option = await screen.findByRole("option", { name: /Gubeng/ });
-    expect(option).toHaveAttribute("aria-disabled", "true");
-    expect(within(option).getByText("Outside our delivery area")).toBeInTheDocument();
+    await user.type(screen.getByRole("combobox"), "depok");
+    const option = await screen.findByRole("option", { name: /Cipayung, Depok/ });
+    expect(option).not.toHaveAttribute("aria-disabled");
     await user.pointer({ keys: "[MouseLeft>]", target: option });
-    expect(onPick).not.toHaveBeenCalled();
+    expect(onPick).toHaveBeenCalledWith(DEPOK);
   });
 
   it("kurang dari 3 huruf: belum mencari", async () => {
