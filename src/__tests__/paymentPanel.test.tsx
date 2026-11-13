@@ -88,3 +88,20 @@ describe("PaymentPanel – mode mock", () => {
     expect(api.post).toHaveBeenCalledWith("/payments/pay-1/simulate");
   });
 });
+
+describe("createPaymentForNewOrder (bayar langsung setelah checkout)", () => {
+  it("QRIS -> tagihan dibuat; tagihan sudah ada (request diulang) / transfer manual -> tidak membuat lagi", async () => {
+    const { createPaymentForNewOrder } = await import("@/features/(costumer)/orders/utils/payment");
+    const withPayment = order(payment());
+    api.post.mockResolvedValue(apiResponse(withPayment));
+
+    const fresh = { ...withPayment, payment: null } as OrderDetail;
+    expect(await createPaymentForNewOrder(fresh, "QRIS", "bca")).toBe(withPayment);
+    expect(api.post).toHaveBeenCalledWith("/orders/PNK-261113-AB12/payments", { method: "QRIS", bank: undefined });
+
+    api.post.mockClear();
+    expect(await createPaymentForNewOrder(withPayment, "QRIS", "bca")).toBe(withPayment);
+    expect(await createPaymentForNewOrder(fresh, "MANUAL_TRANSFER", "bca")).toBe(fresh);
+    expect(api.post).not.toHaveBeenCalled();
+  });
+});

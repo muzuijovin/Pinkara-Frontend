@@ -18,7 +18,7 @@ import { SHIPPING_RATES_KEY, useShippingRates } from "@/features/shipping/hooks/
 import { SESSION_QUERY_KEY, useSession } from "@/features/auth/hooks/useSession";
 import { formatRupiah } from "@/lib/currency.lib";
 import { getErrorMessage } from "@/lib/error.lib";
-import type { PaymentMethod, ShippingMethod } from "@/types/order.type";
+import type { PaymentMethod, ShippingMethod, VaBank } from "@/types/order.type";
 import { CheckoutItems } from "./components/checkoutItems";
 import { CheckoutSummary } from "./components/checkoutSummary";
 import { PaymentMethodSection } from "./components/paymentMethodSection";
@@ -75,6 +75,7 @@ export function CheckoutSection() {
   const [pickedAddressId, setPickedAddressId] = useState<string | null>(null);
   const [pickedCourierId, setPickedCourierId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("QRIS");
+  const [vaBank, setVaBank] = useState<VaBank>("bca");
   const [note, setNote] = useState("");
   // server menolak promo untuk pesanan ini (mis. kuota habis / nomor HP sudah pernah pakai)
   const [promoDropped, setPromoDropped] = useState(false);
@@ -130,12 +131,15 @@ export function CheckoutSection() {
         addressId: shippingMethod === "COURIER" ? (addressId ?? undefined) : undefined,
         courier: courier ? { courierCode: courier.courierCode, serviceCode: courier.serviceCode } : undefined,
         paymentMethod,
+        vaBank,
         buyerNote: note.trim() || undefined,
         expectedTotal: total,
       },
       {
         onSuccess: (order) => {
           toast.success("Order placed! Complete your payment to confirm it.");
+          // tagihan gagal dibuat (gateway gangguan) -> halaman bayar menampilkan pilihan metode untuk dicoba lagi
+          if (!order.payment) toast.info("We couldn't prepare your payment yet. Choose how to pay on the next page to try again.");
           router.replace(`/orders/${order.code}/payment`);
         },
         onError: (err) => {
@@ -250,7 +254,13 @@ export function CheckoutSection() {
                 )}
               </ShippingSection>
 
-              <PaymentMethodSection options={preview.paymentOptions} method={paymentMethod} onChange={setPaymentMethod} />
+              <PaymentMethodSection
+                options={preview.paymentOptions}
+                method={paymentMethod}
+                onChange={setPaymentMethod}
+                bank={vaBank}
+                onBankChange={setVaBank}
+              />
 
               <section aria-label="Note" className="card border border-base-300 bg-base-100">
                 <div className="card-body p-5 sm:p-6">

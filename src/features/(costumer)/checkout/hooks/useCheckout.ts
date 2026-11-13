@@ -5,7 +5,8 @@ import { orderQueryKey } from "@/features/(costumer)/orders/hooks/useOrder";
 import { axiosInstance } from "@/lib/axios-instance.lib";
 import type { ApiResponse } from "@/types/api-response.type";
 import type { Cart } from "@/types/cart.type";
-import type { CheckoutErrorCode, CheckoutPreview, OrderDetail, PaymentMethod, ShippingMethod } from "@/types/order.type";
+import type { CheckoutErrorCode, CheckoutPreview, OrderDetail, PaymentMethod, ShippingMethod, VaBank } from "@/types/order.type";
+import { createPaymentForNewOrder } from "@/features/(costumer)/orders/utils/payment";
 
 export const CHECKOUT_PREVIEW_KEY = ["checkout", "preview"] as const;
 
@@ -31,6 +32,7 @@ export type PlaceOrderVariables = {
   addressId?: string;
   courier?: { courierCode: string; serviceCode: string }; // layanan kurir pilihan (wajib untuk kurir)
   paymentMethod: PaymentMethod;
+  vaBank: VaBank; // dipakai kalau paymentMethod VIRTUAL_ACCOUNT (tidak dikirim ke POST /orders)
   buyerNote?: string;
   expectedTotal: number; // total yang dilihat pembeli; beda dengan hitungan server -> PRICE_CHANGED
 };
@@ -42,11 +44,12 @@ export function usePlaceOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ idempotencyKey, ...body }: PlaceOrderVariables) => {
+    // pesanan dibuat lalu tagihan langsung dibuat (metode & bank dari checkout) -> halaman bayar langsung QR / VA
+    mutationFn: async ({ idempotencyKey, vaBank, ...body }: PlaceOrderVariables) => {
       const res = await axiosInstance.post<ApiResponse<OrderDetail>>("/orders", body, {
         headers: { "Idempotency-Key": idempotencyKey },
       });
-      return res.data.data;
+      return createPaymentForNewOrder(res.data.data, body.paymentMethod, vaBank);
     },
     onSuccess: (order) => {
       // keranjang sudah dikosongkan BE, detail pesanan langsung siap untuk halaman bayar

@@ -44,11 +44,11 @@ function StatusTimeline({ history }: { history: OrderDetailData["statusHistory"]
           {entries.map((entry, index) => (
             <li key={`${entry.toStatus}-${entry.createdAt}`} className="relative flex gap-3 pb-5 last:pb-0">
               {index < entries.length - 1 && (
-                <span aria-hidden="true" className="absolute left-[5px] top-4 h-full w-px bg-base-300" />
+                <span aria-hidden="true" className="absolute left-1.25 top-4 h-full w-px bg-base-300" />
               )}
               <span
                 aria-hidden="true"
-                className={`relative mt-1.5 size-[11px] shrink-0 rounded-full ${index === 0 ? "bg-primary" : "bg-base-300"}`}
+                className={`relative mt-1.5 size-2.75 shrink-0 rounded-full ${index === 0 ? "bg-primary" : "bg-base-300"}`}
               />
               <div className="min-w-0">
                 <p className={`text-sm ${index === 0 ? "font-semibold text-ink" : "text-ink"}`}>

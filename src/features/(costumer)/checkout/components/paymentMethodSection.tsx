@@ -1,5 +1,6 @@
 import { PiBank, PiQrCode } from "react-icons/pi";
-import type { PaymentMethod } from "@/types/order.type";
+import { BankPicker } from "@/features/(costumer)/orders/components/bankPicker";
+import type { PaymentMethod, VaBank } from "@/types/order.type";
 import { OptionCard } from "./optionCard";
 
 const PAYMENT_COPY: Record<PaymentMethod, { title: string; description: string; icon: React.ReactNode }> = {
@@ -29,10 +30,13 @@ type PaymentMethodSectionProps = {
   options: { method: PaymentMethod; expiresInMinutes: number }[];
   method: PaymentMethod;
   onChange: (method: PaymentMethod) => void;
+  bank: VaBank;
+  onBankChange: (bank: VaBank) => void;
 };
 
-// metode bayar dipilih saat checkout karena menentukan batas waktu bayar (PRD §7 & §9)
-export function PaymentMethodSection({ options, method, onChange }: PaymentMethodSectionProps) {
+// metode bayar (+ bank untuk VA) dipilih saat checkout: menentukan batas waktu bayar (PRD §7 & §9) dan
+// tagihan langsung dibuat setelah pesanan jadi, tanpa memilih ulang di halaman bayar
+export function PaymentMethodSection({ options, method, onChange, bank, onBankChange }: PaymentMethodSectionProps) {
   return (
     <section aria-labelledby="payment-title" className="card border border-base-300 bg-base-100">
       <div className="card-body gap-4 p-5 sm:p-6">
@@ -40,7 +44,7 @@ export function PaymentMethodSection({ options, method, onChange }: PaymentMetho
           <h2 id="payment-title" className="text-lg font-semibold text-ink">
             Payment method
           </h2>
-          <p className="text-sm text-ink-muted">You&apos;ll see the payment details on the next step.</p>
+          <p className="text-sm text-ink-muted">Your QR code or account number appears right after you confirm.</p>
         </header>
 
         <fieldset className="grid gap-3 sm:grid-cols-2">
@@ -64,6 +68,8 @@ export function PaymentMethodSection({ options, method, onChange }: PaymentMetho
             />
           ))}
         </fieldset>
+
+        {method === "VIRTUAL_ACCOUNT" && <BankPicker name="checkout-va-bank" value={bank} onChange={onBankChange} />}
       </div>
     </section>
   );

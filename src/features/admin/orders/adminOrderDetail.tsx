@@ -144,8 +144,8 @@ function History({ order }: { order: AdminOrderDetailData }) {
       <ol className="flex flex-col">
         {entries.map((entry, index) => (
           <li key={`${entry.toStatus}-${entry.createdAt}`} className="relative flex gap-3 pb-4 last:pb-0">
-            {index < entries.length - 1 && <span aria-hidden="true" className="absolute left-[5px] top-4 h-full w-px bg-base-300" />}
-            <span aria-hidden="true" className={`relative mt-1.5 size-[11px] shrink-0 rounded-full ${index === 0 ? "bg-primary" : "bg-base-300"}`} />
+            {index < entries.length - 1 && <span aria-hidden="true" className="absolute left-1.25 top-4 h-full w-px bg-base-300" />}
+            <span aria-hidden="true" className={`relative mt-1.5 size-2.75 shrink-0 rounded-full ${index === 0 ? "bg-primary" : "bg-base-300"}`} />
             <div className="min-w-0 text-sm">
               <p className={index === 0 ? "font-semibold text-ink" : "text-ink"}>{ORDER_STATUS[entry.toStatus].label}</p>
               {entry.remark && <p className="text-xs text-ink-muted wrap-break-word">{entry.remark}</p>}
