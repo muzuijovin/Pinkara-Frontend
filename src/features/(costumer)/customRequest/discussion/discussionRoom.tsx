@@ -15,14 +15,14 @@ import { RequestStatusBadge } from "../constants/requestStatus";
 import { useCancelCustomRequest, useCustomRequest, useRejectQuotation, useSendMessage } from "../hooks/useCustomRequests";
 import { AcceptQuotationDialog } from "./components/acceptQuotationDialog";
 import { MessageInput } from "./components/messageInput";
-import { MessageList } from "./components/messageList";
+import { MessageList, pendingMessage } from "./components/messageList";
 import { QuotationCard } from "./components/quotationCard";
 
 // ruang diskusi custom (PRD §8): chat dengan florist, penawaran (Accept & pay / Decline), brief, batal
 export function DiscussionRoom() {
   const { id: code } = useParams<{ id: string }>();
   const { data: request, isPending, isError, error, refetch } = useCustomRequest(code);
-  const { mutate: sendMessage, isPending: isSending } = useSendMessage(code);
+  const { mutate: sendMessage, isPending: isSending, variables: sending } = useSendMessage(code);
   const { mutate: reject, isPending: isRejecting } = useRejectQuotation(code);
   const { mutate: cancel, isPending: isCancelling } = useCancelCustomRequest(code);
   const [isAccepting, setIsAccepting] = useState(false);
@@ -77,7 +77,8 @@ export function DiscussionRoom() {
           </header>
           <div className="flex max-h-[60vh] min-h-72 flex-col overflow-y-auto">
             <MessageList
-              messages={request.messages}
+              // pesan yang sedang dikirim langsung tampil (koneksi ke database bisa beberapa detik)
+              messages={isSending && sending ? [...request.messages, pendingMessage(sending)] : request.messages}
               otherLabel={() => "Pinkara florist"}
               emptyText="Our florist will reply here soon. Feel free to add more details."
             />
@@ -85,10 +86,13 @@ export function DiscussionRoom() {
           <MessageInput
             isPending={isSending}
             disabledReason={request.status === "DIBATALKAN" ? "This request was cancelled." : undefined}
-            onSend={(message, done) =>
+            onSend={(message, restore) =>
               sendMessage(message, {
-                onSuccess: done,
-                onError: (err) => toast.error(getErrorMessage(err, "Couldn't send your message.")),
+                onSuccess: () => message.previewUrls.forEach((url) => URL.revokeObjectURL(url)),
+                onError: (err) => {
+                  restore();
+                  toast.error(getErrorMessage(err, "Couldn't send your message."));
+                },
               })
             }
           />

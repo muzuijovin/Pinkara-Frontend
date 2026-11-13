@@ -10,7 +10,7 @@ import { PageLoader } from "@/components/ui/pageLoader";
 import { BriefSummary } from "@/features/(costumer)/customRequest/components/briefSummary";
 import { RequestStatusBadge } from "@/features/(costumer)/customRequest/constants/requestStatus";
 import { MessageInput } from "@/features/(costumer)/customRequest/discussion/components/messageInput";
-import { MessageList } from "@/features/(costumer)/customRequest/discussion/components/messageList";
+import { MessageList, pendingMessage } from "@/features/(costumer)/customRequest/discussion/components/messageList";
 import { QuotationCard } from "@/features/(costumer)/customRequest/discussion/components/quotationCard";
 import { formatDateTimeWIB } from "@/lib/datetime.lib";
 import { getErrorMessage } from "@/lib/error.lib";
@@ -21,7 +21,7 @@ import { useAdminCancelRequest, useAdminCustomRequest, useAdminSendMessage, useW
 export function AdminCustomRequestDetail() {
   const { id: code } = useParams<{ id: string }>();
   const { data: request, isPending, isError, error, refetch } = useAdminCustomRequest(code);
-  const { mutate: send, isPending: isSending } = useAdminSendMessage(code);
+  const { mutate: send, isPending: isSending, variables: sending } = useAdminSendMessage(code);
   const { mutate: withdraw, isPending: isWithdrawing } = useWithdrawQuotation(code);
   const { mutate: cancel, isPending: isCancelling } = useAdminCancelRequest(code);
   const [isQuoting, setIsQuoting] = useState(false);
@@ -71,12 +71,22 @@ export function AdminCustomRequestDetail() {
             <h2 className="font-semibold text-ink">Chat</h2>
           </header>
           <div className="flex max-h-[60vh] min-h-72 flex-col overflow-y-auto">
-            <MessageList messages={request.messages} otherLabel={(message) => message.sender.name} emptyText="No messages yet. Say hello and ask anything you need to know." />
+            <MessageList
+              messages={isSending && sending ? [...request.messages, pendingMessage(sending)] : request.messages}
+              otherLabel={(message) => message.sender.name} emptyText="No messages yet. Say hello and ask anything you need to know." />
           </div>
           <MessageInput
             isPending={isSending}
             disabledReason={request.status === "DIBATALKAN" ? "This request was cancelled." : undefined}
-            onSend={(message, done) => send(message, { onSuccess: done, onError: (err) => toast.error(getErrorMessage(err)) })}
+            onSend={(message, restore) =>
+              send(message, {
+                onSuccess: () => message.previewUrls.forEach((url) => URL.revokeObjectURL(url)),
+                onError: (err) => {
+                  restore();
+                  toast.error(getErrorMessage(err));
+                },
+              })
+            }
           />
         </section>
 

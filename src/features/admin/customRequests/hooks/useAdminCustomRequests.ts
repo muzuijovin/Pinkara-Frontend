@@ -61,7 +61,7 @@ function useAction<TVariables>(code: string, request: (variables: TVariables) =>
 }
 
 export function useAdminSendMessage(code: string) {
-  return useAction(code, async ({ body, attachments }: { body: string; attachments: File[] }) => {
+  return useAction(code, async ({ body, attachments }: { body: string; attachments: File[]; previewUrls?: string[] }) => {
     const formData = new FormData();
     if (body.trim()) formData.append("body", body.trim());
     attachments.forEach((file) => formData.append("attachments", file));

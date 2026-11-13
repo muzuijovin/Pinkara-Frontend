@@ -88,8 +88,14 @@ export function CheckoutSummary({
           className="btn btn-primary h-12 w-full text-[15px]"
         >
           {isPending && <span aria-hidden="true" className="loading loading-spinner loading-sm" />}
-          {isPending ? "Placing order..." : "Place order"}
+          {isPending ? "Placing your order..." : "Place order"}
         </button>
+        {/* pesanan + tagihan dibuat sekaligus (beberapa detik): beri tahu supaya tidak diklik ulang / ditutup */}
+        {isPending && (
+          <p role="status" className="text-center text-xs text-ink-muted">
+            Reserving your items and preparing your payment. This can take a few seconds, please keep this page open.
+          </p>
+        )}
         {disabledReason && <p className="text-center text-xs text-danger-text">{disabledReason}</p>}
 
         <p className="flex items-center justify-center gap-1.5 text-center text-xs text-ink-muted">

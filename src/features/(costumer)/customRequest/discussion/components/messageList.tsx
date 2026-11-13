@@ -6,8 +6,23 @@ import { PiChatsCircle } from "react-icons/pi";
 import { formatDateTimeWIB } from "@/lib/datetime.lib";
 import type { CustomMessage } from "@/types/customRequest.type";
 
+// pending = pesan sendiri yang sedang dikirim (tampil seketika sebelum server membalas)
+export type MessageListItem = CustomMessage & { pending?: boolean };
+
+// pesan sementara dari isi yang sedang dikirim (lampiran memakai URL pratinjau lokal)
+export const pendingMessage = (message: { body: string; previewUrls?: string[] }): MessageListItem => ({
+  id: "pending",
+  body: message.body.trim() || null,
+  attachments: message.previewUrls ?? [],
+  readAt: null,
+  createdAt: new Date().toISOString(),
+  mine: true,
+  sender: { name: "You", role: "CUSTOMER", avatarUrl: null },
+  pending: true,
+});
+
 type MessageListProps = {
-  messages: CustomMessage[];
+  messages: MessageListItem[];
   // nama yang tampil untuk pihak lawan, mis. "Pinkara florist" (pembeli) atau nama pembeli (admin)
   otherLabel: (message: CustomMessage) => string;
   emptyText: string;
@@ -34,7 +49,11 @@ export function MessageList({ messages, otherLabel, emptyText }: MessageListProp
   return (
     <ol aria-label="Messages" className="flex flex-col gap-4 p-4 sm:p-5">
       {messages.map((message) => (
-        <li key={message.id} className={`flex flex-col gap-1 ${message.mine ? "items-end" : "items-start"}`}>
+        <li
+          key={message.id}
+          aria-busy={message.pending || undefined}
+          className={`flex flex-col gap-1 ${message.mine ? "items-end" : "items-start"} ${message.pending ? "opacity-70" : ""}`}
+        >
           {!message.mine && <span className="px-1 text-xs font-medium text-ink-muted">{otherLabel(message)}</span>}
           <div
             className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed sm:max-w-[75%] ${
@@ -60,8 +79,14 @@ export function MessageList({ messages, otherLabel, emptyText }: MessageListProp
             )}
           </div>
           <span className="px-1 text-[11px] text-ink-muted">
-            {formatDateTimeWIB(message.createdAt)}
-            {message.mine && message.readAt && " · Read"}
+            {message.pending ? (
+              "Sending…"
+            ) : (
+              <>
+                {formatDateTimeWIB(message.createdAt)}
+                {message.mine && message.readAt && " · Read"}
+              </>
+            )}
           </span>
         </li>
       ))}
