@@ -75,6 +75,27 @@
   --color-blue-brand-900: #04214d;
   --color-blue-brand-950: #021229;
 
+  /* hijau emerald dari logo Pinkara (latar lingkaran logo = 600 & 800) */
+  --color-green-brand-50: #eef7f4;
+  --color-green-brand-100: #d3ebe4;
+  --color-green-brand-200: #a7d6c9;
+  --color-green-brand-300: #6fb9a6;
+  --color-green-brand-400: #3a9881;
+  --color-green-brand-500: #127a64;
+  --color-green-brand-600: #005b4d; /* logo */
+  --color-green-brand-700: #004a3e;
+  --color-green-brand-800: #003c2d; /* logo (tengah) */
+  --color-green-brand-900: #022a20;
+  --color-green-brand-950: #011a14;
+
+  /* footer hijau (nuansa logo). Pasangan teks lolos WCAG AA di atas footer & footer-deep */
+  --color-footer: #003c2d; /* = green-brand-800 */
+  --color-footer-deep: #022a20; /* = green-brand-900, bagian paling bawah */
+  --color-on-footer: #ffffff; /* judul & teks utama */
+  --color-on-footer-muted: #c5ddd5; /* teks isi & link */
+  --color-on-footer-accent: #f5aed4; /* hover link, aksen pink (= pink-brand-200) */
+  --color-footer-line: rgb(255 255 255 / 0.14); /* garis pemisah */
+
   /* token semantik halaman publik.
      Pasangan teks di bawah lolos kontras WCAG AA 4.5:1 di atas putih / surface */
   --color-ink: #1a1c1c; /* teks utama / headline */
