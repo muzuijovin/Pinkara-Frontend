@@ -161,9 +161,14 @@ export function AcceptQuotationDialog({ request, quotation, onClose }: AcceptQuo
             </form>
             <button type="button" disabled={Boolean(disabledReason) || isPending} onClick={submit} className="btn btn-primary h-11">
               {isPending && <span aria-hidden="true" className="loading loading-spinner loading-sm" />}
-              {isPending ? "Placing order..." : `Accept & pay ${formatRupiah(total)}`}
+              {isPending ? "Placing your order..." : `Accept & pay ${formatRupiah(total)}`}
             </button>
           </div>
+          {isPending && (
+            <p role="status" className="text-right text-xs text-ink-muted">
+              Preparing your order and payment. This can take a few seconds.
+            </p>
+          )}
         </footer>
       </div>
       <form method="dialog" className="modal-backdrop">

@@ -85,7 +85,7 @@ function useRequestAction<TVariables>(code: string, request: (variables: TVariab
 
 // POST /custom-requests/:code/messages (teks + maks 3 gambar)
 export function useSendMessage(code: string) {
-  return useRequestAction(code, async ({ body, attachments }: { body: string; attachments: File[] }) => {
+  return useRequestAction(code, async ({ body, attachments }: { body: string; attachments: File[]; previewUrls?: string[] }) => {
     const formData = new FormData();
     if (body.trim()) formData.append("body", body.trim());
     attachments.forEach((file) => formData.append("attachments", file));

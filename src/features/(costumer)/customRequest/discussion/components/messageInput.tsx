@@ -10,15 +10,20 @@ import {
   MAX_MESSAGE_ATTACHMENTS,
 } from "@/features/validation/customRequestSchema";
 
+// pesan yang dikirim + URL pratinjau lampiran (dipakai untuk menampilkan pesan "Sending…" seketika)
+export type OutgoingMessage = { body: string; attachments: File[]; previewUrls: string[] };
+
 type MessageInputProps = {
-  onSend: (message: { body: string; attachments: File[] }, done: () => void) => void;
+  // restore = kembalikan teks & lampiran ke kolom ketik (dipanggil saat gagal terkirim)
+  onSend: (message: OutgoingMessage, restore: () => void) => void;
   isPending: boolean;
   disabledReason?: string; // mis. request sudah dibatalkan
 };
 
 const BODY_MAX = 2000;
 
-// kirim pesan + lampiran (maks 3 gambar). Enter = kirim, Shift+Enter = baris baru
+// kirim pesan + lampiran (maks 3 gambar). Enter = kirim, Shift+Enter = baris baru.
+// Kolom langsung dikosongkan saat kirim (pesan tampil seketika di daftar); gagal -> isi dikembalikan
 export function MessageInput({ onSend, isPending, disabledReason }: MessageInputProps) {
   const inputId = useId();
   const [body, setBody] = useState("");
@@ -32,10 +37,13 @@ export function MessageInput({ onSend, isPending, disabledReason }: MessageInput
 
   const send = () => {
     if (!canSend) return;
-    onSend({ body, attachments: files.map((item) => item.file) }, () => {
-      files.forEach((item) => URL.revokeObjectURL(item.url));
-      setBody("");
-      setFiles([]);
+    const sentBody = body;
+    const sentFiles = files;
+    setBody("");
+    setFiles([]);
+    onSend({ body: sentBody, attachments: sentFiles.map((item) => item.file), previewUrls: sentFiles.map((item) => item.url) }, () => {
+      setBody(sentBody);
+      setFiles(sentFiles);
     });
   };
 
