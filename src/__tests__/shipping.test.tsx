@@ -94,7 +94,7 @@ describe("Checkout dengan kurir", () => {
     ],
     paymentOptions: [{ method: "QRIS", expiresInMinutes: 15 }],
   };
-  const address = { id: "addr-1", label: "Home", recipientName: "Rina", recipientPhone: "081234567890", fullAddress: "Jl. Ijen 10", city: "Malang", postalCode: "65119", latitude: -7.97, longitude: 112.62, isDefault: true, createdAt: "", updatedAt: "" };
+  const address = { id: "addr-1", label: "Home", recipientName: "Rina", recipientPhone: "081234567890", fullAddress: "Jl. Ijen 10", city: "Malang", postalCode: "65111", areaId: "MOCK-KLOJEN-65111", areaName: "Klojen, Malang, Jawa Timur. 65111", district: "Klojen", province: "Jawa Timur", latitude: -7.97, longitude: 112.62, isDefault: true, createdAt: "", updatedAt: "" };
   const user = { id: "u1", name: "Rina", email: "rina@mail.com", role: "CUSTOMER", phone: null, avatarUrl: null, emailVerifiedAt: "2026-11-01T00:00:00.000Z", createdAt: "" };
 
   beforeEach(() => {

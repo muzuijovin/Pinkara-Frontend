@@ -19,7 +19,7 @@ export type OrderStatus =
 // PRICE_CHANGED = total berubah (harga / promo), CART_CHANGED = stok / produk berubah,
 // CHECKOUT_BUSY = server sibuk (aman diulang dengan idempotency key yang sama)
 // SHIPPING_CHANGED = layanan kurir yang dipilih tidak tersedia lagi (tarif diambil ulang server)
-export type CheckoutErrorCode = "PRICE_CHANGED" | "CART_CHANGED" | "CART_EMPTY" | "ADDRESS_NOT_FOUND" | "CHECKOUT_BUSY" | "SHIPPING_CHANGED";
+export type CheckoutErrorCode = "PRICE_CHANGED" | "CART_CHANGED" | "CART_EMPTY" | "ADDRESS_NOT_FOUND" | "CHECKOUT_BUSY" | "SHIPPING_CHANGED" | "ADDRESS_INCOMPLETE";
 
 export type PaymentStatus =
   | "PENDING"
