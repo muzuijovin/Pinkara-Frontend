@@ -27,5 +27,4 @@ export type Area = {
   city: string;
   district: string;
   postalCode: string;
-  deliverable: boolean; // false = di luar Malang Raya
 };

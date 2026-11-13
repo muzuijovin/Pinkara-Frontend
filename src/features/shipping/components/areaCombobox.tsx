@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { PiCheckCircle, PiMagnifyingGlass, PiMapPinArea, PiProhibit } from "react-icons/pi";
+import { PiCheckCircle, PiMagnifyingGlass, PiMapPinArea } from "react-icons/pi";
 import { useDebounce } from "use-debounce";
 import { getErrorMessage } from "@/lib/error.lib";
 import type { Area } from "@/types/shipping.type";
@@ -16,7 +16,7 @@ type AreaComboboxProps = {
 };
 
 // pilih kecamatan dari daftar resmi (kota & kode pos ikut dari sini, tidak bisa diketik bebas).
-// Combobox: ketik -> panah atas/bawah -> Enter memilih, Esc menutup. Wilayah di luar Malang Raya tidak bisa dipilih
+// Combobox: ketik -> panah atas/bawah -> Enter memilih, Esc menutup. Kirim ke seluruh Indonesia
 export function AreaCombobox({ value, onChange, error }: AreaComboboxProps) {
   const inputId = useId();
   const listId = useId();
@@ -33,7 +33,6 @@ export function AreaCombobox({ value, onChange, error }: AreaComboboxProps) {
   const optionId = (index: number) => `${listId}-${index}`;
 
   const choose = (area: Area) => {
-    if (!area.deliverable) return;
     onChange(area);
     setText("");
     setOpen(false);
@@ -107,7 +106,7 @@ export function AreaCombobox({ value, onChange, error }: AreaComboboxProps) {
         {isFetching && <span aria-hidden="true" className="loading loading-spinner loading-xs text-ink-muted" />}
       </span>
       <span id={hintId} className="text-xs text-ink-muted">
-        We deliver within Malang, Batu and Malang Regency. Choose your district from the list.
+        We ship across Indonesia from our studio in Malang. Choose your district from the list.
       </span>
       {error && (
         <span id={errorId} role="alert" className="text-xs text-danger-text">
@@ -127,26 +126,16 @@ export function AreaCombobox({ value, onChange, error }: AreaComboboxProps) {
               id={optionId(index)}
               role="option"
               aria-selected={index === active}
-              aria-disabled={!area.deliverable || undefined}
               // mousedown (bukan click) supaya terpilih sebelum input kehilangan fokus
               onMouseDown={(event) => {
                 event.preventDefault();
                 choose(area);
               }}
               onMouseEnter={() => setActive(index)}
-              className={`flex items-start gap-2.5 rounded-lg px-3 py-2.5 text-sm ${index === active ? "bg-surface-muted" : ""} ${
-                area.deliverable ? "cursor-pointer text-ink" : "cursor-not-allowed text-ink-muted"
-              }`}
+              className={`flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2.5 text-sm text-ink ${index === active ? "bg-surface-muted" : ""}`}
             >
-              {area.deliverable ? (
-                <PiMapPinArea aria-hidden="true" size={18} className="mt-px shrink-0 text-ink-muted" />
-              ) : (
-                <PiProhibit aria-hidden="true" size={18} className="mt-px shrink-0" />
-              )}
-              <span className="flex flex-col">
-                <span>{area.name}</span>
-                {!area.deliverable && <span className="text-xs">Outside our delivery area</span>}
-              </span>
+              <PiMapPinArea aria-hidden="true" size={18} className="mt-px shrink-0 text-ink-muted" />
+              <span>{area.name}</span>
             </li>
           ))}
         </ul>

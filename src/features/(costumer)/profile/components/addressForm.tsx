@@ -73,13 +73,31 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
         </p>
       )}
 
-      <TextField
-        id="label"
-        label="Address label (optional)"
-        placeholder="Home, Office, Apartment..."
-        error={errors.label?.message}
-        {...register("label")}
-      />
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="fullAddress" className="text-sm font-medium text-ink">
+          Street address
+          <span aria-hidden="true" className="text-danger-text">
+            {" "}
+            *
+          </span>
+        </label>
+        <textarea
+          id="fullAddress"
+          rows={3}
+          autoComplete="street-address"
+          placeholder="Street name, house number, RT/RW, building, landmark"
+          aria-required
+          aria-invalid={errors.fullAddress ? true : undefined}
+          aria-describedby={errors.fullAddress ? "fullAddress-error" : undefined}
+          className={`textarea w-full text-base sm:text-sm ${errors.fullAddress ? "textarea-error" : ""}`}
+          {...register("fullAddress")}
+        />
+        {errors.fullAddress && (
+          <p id="fullAddress-error" className="text-xs text-danger-text">
+            {errors.fullAddress.message}
+          </p>
+        )}
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
           id="recipientName"
@@ -111,31 +129,13 @@ export function AddressForm({ address, isFirstAddress, onDone, onCancel }: Addre
         error={errors.areaId?.message}
       />
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="fullAddress" className="text-sm font-medium text-ink">
-          Street address
-          <span aria-hidden="true" className="text-danger-text">
-            {" "}
-            *
-          </span>
-        </label>
-        <textarea
-          id="fullAddress"
-          rows={3}
-          autoComplete="street-address"
-          placeholder="Street name, house number, RT/RW, building, landmark"
-          aria-required
-          aria-invalid={errors.fullAddress ? true : undefined}
-          aria-describedby={errors.fullAddress ? "fullAddress-error" : undefined}
-          className={`textarea w-full text-base sm:text-sm ${errors.fullAddress ? "textarea-error" : ""}`}
-          {...register("fullAddress")}
-        />
-        {errors.fullAddress && (
-          <p id="fullAddress-error" className="text-xs text-danger-text">
-            {errors.fullAddress.message}
-          </p>
-        )}
-      </div>
+      <TextField
+        id="label"
+        label="Address label (optional)"
+        placeholder="Home, Office, Apartment..."
+        error={errors.label?.message}
+        {...register("label")}
+      />
 
       <LocationPicker
         required
