@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { PiProhibit, PiTruck } from "react-icons/pi";
 import { toast } from "react-toastify";
+import { SingleImageInput } from "@/components/form/singleImageInput";
 import { TextareaField } from "@/components/form/textareaField";
 import { formatRupiah } from "@/lib/currency.lib";
 import { getErrorMessage } from "@/lib/error.lib";
@@ -104,16 +105,30 @@ function CancelDialog({ order, onClose }: { order: AdminOrderDetail; onClose: ()
 
 function RefundDialog({ order, onClose }: { order: AdminOrderDetail; onClose: () => void }) {
   const { mutate: refund, isPending } = useRefundOrder(order.code);
-  const [amount, setAmount] = useState(String(order.total));
+  // dibatalkan pembeli -> nominal 50% sudah terisi; lainnya -> total penuh
+  const due = order.refundDue ?? order.total;
+  const [amount, setAmount] = useState(String(due));
   const [reason, setReason] = useState("");
+  const [proof, setProof] = useState<File | null>(null);
   const amountNumber = Number(amount);
   const amountError = !/^\d+$/.test(amount) || amountNumber < 1 ? "Enter a whole number" : amountNumber > order.total ? "Can't be more than the order total" : undefined;
 
   return (
     <ActionDialog title="Mark as refunded" onClose={onClose}>
       <p className="mt-2 text-sm text-ink-muted">
-        Record the refund after you&apos;ve sent the money back to the customer. Order total: {formatRupiah(order.total)}.
+        Record the refund after you&apos;ve sent the money back to the customer. Order total: {formatRupiah(order.total)}
+        {due !== order.total && <>, to refund: {formatRupiah(due)} (cancelled by the customer)</>}.
       </p>
+      <div className="mt-3 rounded-box bg-surface-muted p-3 text-sm">
+        {order.refundAccountNumber ? (
+          <p className="text-ink">
+            <span className="block text-xs text-ink-muted">Customer&apos;s bank details</span>
+            {order.refundBankName} · <span className="font-mono">{order.refundAccountNumber}</span> · {order.refundAccountName}
+          </p>
+        ) : (
+          <p className="text-danger-text">The customer hasn&apos;t added refund bank details yet. Ask them to add it on their order page.</p>
+        )}
+      </div>
       <div className="mt-4 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="refund-amount" className="text-sm font-medium text-ink">
@@ -138,6 +153,7 @@ function RefundDialog({ order, onClose }: { order: AdminOrderDetail; onClose: ()
           onChange={(event) => setReason(event.target.value)}
           placeholder="e.g. Full refund via BCA transfer on 12 Nov"
         />
+        <SingleImageInput label="Transfer receipt (optional)" currentUrl={null} file={proof} removed={false} onFileChange={setProof} onRemovedChange={() => undefined} />
       </div>
       <div className="modal-action">
         <form method="dialog">
@@ -150,7 +166,7 @@ function RefundDialog({ order, onClose }: { order: AdminOrderDetail; onClose: ()
           disabled={Boolean(amountError) || reason.trim().length < 3 || isPending}
           onClick={() =>
             refund(
-              { amount: amountNumber, reason: reason.trim() },
+              { amount: amountNumber, reason: reason.trim(), proof },
               {
                 onSuccess: () => {
                   toast.success("Refund recorded.");

@@ -18,7 +18,8 @@ import {
 import { useAdminBadges, type AdminBadgeKey, type AdminBadges } from "./useAdminBadges";
 
 // badge = kunci angka notifikasi (pesanan baru / custom belum dibalas / pembayaran perlu dicek)
-type NavItem = { label: string; href: string; icon: IconType; ready: boolean; badge?: AdminBadgeKey };
+// alertBadge = angka kedua berwarna merah (mis. pembatalan & refund di Orders)
+type NavItem = { label: string; href: string; icon: IconType; ready: boolean; badge?: AdminBadgeKey; alertBadge?: AdminBadgeKey };
 
 // menu panel admin (PRD §12). ready = halaman sudah dibuat; yang belum tampil "Soon" & tidak bisa diklik
 const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
@@ -26,7 +27,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Store",
     items: [
       { label: "Dashboard", href: "/admin", icon: PiGauge, ready: true },
-      { label: "Orders", href: "/admin/orders", icon: PiReceipt, ready: true, badge: "orders" },
+      { label: "Orders", href: "/admin/orders", icon: PiReceipt, ready: true, badge: "orders", alertBadge: "orderRefunds" },
       { label: "Custom requests", href: "/admin/custom-requests", icon: PiChatsCircle, ready: true, badge: "customRequests" },
       { label: "Payments", href: "/admin/payments", icon: PiCreditCard, ready: true, badge: "payments" },
     ],
@@ -58,9 +59,26 @@ const ALL_ITEMS = NAV_GROUPS.flatMap((group) => group.items);
 // arti angka untuk pembaca layar
 const BADGE_LABEL: Record<AdminBadgeKey, string> = {
   orders: "new paid orders",
+  orderRefunds: "cancelled orders to refund",
   customRequests: "requests waiting for your reply",
   payments: "payments to check",
 };
+
+// angka bulat: pink = baru masuk, merah = perlu ditindak (pembatalan / refund). Arti angka dibacakan pembaca layar
+function Badge({ count, label, tone = "default" }: { count: number; label: string; tone?: "default" | "alert" }) {
+  return (
+    <span
+      className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold tabular-nums ${
+        tone === "alert" ? "bg-danger-text text-white" : "bg-primary text-primary-content"
+      }`}
+    >
+      <span aria-hidden="true">{count > 99 ? "99+" : count}</span>
+      <span className="sr-only">
+        , {count} {label}
+      </span>
+    </span>
+  );
+}
 
 type NavLinkProps = { item: NavItem; pathname: string; badges?: AdminBadges; compact?: boolean };
 
@@ -69,6 +87,7 @@ function NavLink({ item, pathname, badges, compact = false }: NavLinkProps) {
   const active = isActive(pathname, href);
   // sedang dibuka -> angka disembunyikan (BE juga mencatat menu ini sudah dilihat)
   const count = item.badge && !active ? (badges?.[item.badge] ?? 0) : 0;
+  const alertCount = item.alertBadge && !active ? (badges?.[item.alertBadge] ?? 0) : 0;
   const base = compact
     ? "flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm"
     : "flex h-11 items-center gap-3 rounded-lg px-3 text-[15px]";
@@ -93,14 +112,8 @@ function NavLink({ item, pathname, badges, compact = false }: NavLinkProps) {
     >
       <Icon aria-hidden="true" size={compact ? 18 : 20} />
       <span className={compact ? undefined : "flex-1"}>{label}</span>
-      {count > 0 && item.badge && (
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-content tabular-nums">
-          <span aria-hidden="true">{count > 99 ? "99+" : count}</span>
-          <span className="sr-only">
-            , {count} {BADGE_LABEL[item.badge]}
-          </span>
-        </span>
-      )}
+      {count > 0 && item.badge && <Badge count={count} label={BADGE_LABEL[item.badge]} />}
+      {alertCount > 0 && item.alertBadge && <Badge count={alertCount} label={BADGE_LABEL[item.alertBadge]} tone="alert" />}
     </Link>
   );
 }
