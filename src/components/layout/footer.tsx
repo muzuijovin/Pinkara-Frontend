@@ -1,120 +1,153 @@
+import Image from "next/image";
 import Link from "next/link";
-import { PiSealCheck, PiSnowflake } from "react-icons/pi";
+import type { IconType } from "react-icons";
+import { PiEnvelopeSimple, PiInstagramLogo, PiMapPin, PiWhatsappLogo } from "react-icons/pi";
+import { type BrandLogo as Brand, emailUrl, instagramUrl, PAYMENT_METHODS, SHIPPING_PARTNERS, SITE, whatsappDisplay, whatsappUrl } from "@/config/site";
 import { BrandLogo } from "./brandLogo";
 
-// isi mengikuti footer Figma (1:1785)
-const SERVICE_LINKS = [
-  { label: "Track Your Order", href: "/orders" },
-  { label: "Bespoke Hamper Consultation", href: "/custom-order" },
-  { label: "Return Policy", href: "/refund-policy" },
-  { label: "Flower Care Guide", href: "/flower-care" },
-];
-
-const OPENING_HOURS = [
-  { day: "Mon – Sat", time: "08:00 – 20:00 WIB" },
-  { day: "Sun & Holidays", time: "09:00 – 17:00 WIB" },
-];
-
-const QUALITY_BADGES = [
+const LINK_GROUPS = [
   {
-    icon: PiSealCheck,
-    title: "100% Fresh, Hand-Picked Flowers",
-    description: "Picked daily from accredited farms",
+    title: "Shop",
+    links: [
+      { label: "All products", href: "/products" },
+      { label: "Custom order", href: "/custom-order" },
+      { label: "Track your order", href: "/orders" },
+      { label: "Flower care guide", href: "/blog/flower-care-guide" },
+    ],
   },
   {
-    icon: PiSnowflake,
-    title: "Refrigerated Same-Day Delivery",
-    description: "Temperature-controlled delivery vans",
+    title: "Pinkara",
+    links: [
+      { label: "About us", href: "/about" },
+      { label: "Blog", href: "/blog" },
+      { label: "Privacy policy", href: "/privacy" },
+    ],
   },
 ];
 
-const LEGAL_LINKS = [
-  { label: "Terms & Conditions", href: "/terms" },
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Contact Us", href: "/contact" },
+const SOCIALS: { label: string; href: string; icon: IconType; external: boolean }[] = [
+  { label: "Instagram", href: instagramUrl, icon: PiInstagramLogo, external: true },
+  { label: "WhatsApp", href: whatsappUrl, icon: PiWhatsappLogo, external: true },
+  { label: "Email", href: emailUrl, icon: PiEnvelopeSimple, external: false },
 ];
 
-// footer-title DaisyUI defaultnya uppercase + opacity 60%, dinormalkan supaya kontras teks aman
-const titleClass = "footer-title mb-1 text-base font-semibold normal-case text-ink opacity-100";
-const linkClass = "link link-hover text-sm text-ink-muted hover:text-primary";
+const titleClass = "mb-3 text-base font-semibold text-ink";
+const linkClass =
+  "text-sm text-ink-muted transition-colors duration-200 hover:text-accent-text focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
-// footer untuk halaman publik & customer
+// logo metode bayar & kurir di kotak putih (logo SVG dipakai apa adanya -> unoptimized)
+function Logos({ label, items }: { label: string; items: Brand[] }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">{label}</h2>
+      <ul className="flex flex-wrap gap-2">
+        {items.map((item) => (
+          <li key={item.name} title={item.name} className="flex h-9 items-center rounded-md border border-base-300 bg-white px-2.5">
+            <Image src={item.src} alt={item.name} width={item.width} height={item.height} unoptimized className="h-5 w-auto" />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// footer halaman publik & customer: brand + sosial media, menu, kontak & jam buka, metode bayar & kurir, legal.
+// Data kontak diambil dari src/config/site.ts
 export default function Footer() {
   return (
     <footer className="border-t border-base-300 bg-base-100">
-      <div className="footer mx-auto max-w-7xl gap-y-10 px-4 pb-8 pt-12 sm:footer-horizontal md:px-6">
-        {/* brand */}
-        <aside className="max-w-xs">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 pt-12 pb-10 sm:grid-cols-2 md:px-6 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
+        {/* brand & sosial media */}
+        <div className="flex flex-col gap-4">
           <BrandLogo showTagline={false} />
-          <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-            An artisan boutique floral studio in Malang, East Java. Freshly curated flower arrangements, premium
-            gift hampers, and luxury floral installations for every special moment.
+          <p className="max-w-xs text-sm leading-relaxed text-ink-muted">
+            A floral studio in {SITE.city}. Ready-made bouquets and custom pieces, arranged by hand and delivered across Indonesia.
           </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className="badge border-none bg-accent-soft text-accent-text">Artisan Florist</span>
-            <span className="badge border-none bg-surface-muted text-ink-muted">Est. 2019</span>
-          </div>
-        </aside>
-
-        {/* layanan pelanggan */}
-        <nav aria-label="Customer service">
-          <h2 className={titleClass}>Customer Service</h2>
-          {SERVICE_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className={`${linkClass} py-1`}>
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* jam operasional */}
-        <div className="w-full max-w-xs">
-          <h2 className={titleClass}>Studio Hours</h2>
-          <dl className="w-full space-y-3 text-sm">
-            {OPENING_HOURS.map((item) => (
-              <div key={item.day} className="flex justify-between gap-4">
-                <dt className="text-ink-muted">{item.day}</dt>
-                <dd className="font-medium tabular-nums text-ink">{item.time}</dd>
-              </div>
-            ))}
-            <div className="flex justify-between gap-4">
-              <dt className="text-ink-muted">Express Delivery</dt>
-              <dd className="font-medium text-accent-text">Same-Day Dispatch</dd>
-            </div>
-          </dl>
-          <p className="mt-2 text-xs leading-relaxed text-ink-muted">
-            Orders placed before 3:00 PM WIB are delivered the same day.
-          </p>
-        </div>
-
-        {/* standar kualitas */}
-        <div className="w-full max-w-xs">
-          <h2 className={titleClass}>Our Quality Promise</h2>
-          <ul className="w-full space-y-3">
-            {QUALITY_BADGES.map(({ icon: Icon, title, description }) => (
-              <li key={title} className="flex gap-3 rounded-box bg-surface-muted p-3">
-                <Icon aria-hidden="true" size={20} className="mt-0.5 shrink-0 text-primary" />
-                <div>
-                  <p className="text-sm font-medium text-ink">{title}</p>
-                  <p className="mt-0.5 text-xs text-ink-muted">{description}</p>
-                </div>
+          <ul aria-label="Follow and contact us" className="flex gap-2">
+            {SOCIALS.map(({ label, href, icon: Icon, external }) => (
+              <li key={label}>
+                <a
+                  href={href}
+                  {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  aria-label={external ? `${label} (opens in a new tab)` : label}
+                  className="flex size-11 items-center justify-center rounded-full bg-surface-muted text-ink transition-colors duration-200 hover:bg-accent-soft hover:text-accent-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                >
+                  <Icon aria-hidden="true" size={22} />
+                </a>
               </li>
             ))}
           </ul>
         </div>
+
+        {/* menu */}
+        {LINK_GROUPS.map((group) => (
+          <nav key={group.title} aria-labelledby={`footer-${group.title}`}>
+            <h2 id={`footer-${group.title}`} className={titleClass}>
+              {group.title}
+            </h2>
+            <ul className="flex flex-col gap-2.5">
+              {group.links.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className={linkClass}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
+
+        {/* kontak & jam buka */}
+        <div>
+          <h2 className={titleClass}>Visit & contact</h2>
+          <ul className="flex flex-col gap-2.5 text-sm">
+            <li className="flex items-start gap-2 text-ink-muted">
+              <PiMapPin aria-hidden="true" size={18} className="mt-px shrink-0 text-primary" />
+              {SITE.address}
+            </li>
+            <li>
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={`${linkClass} flex items-center gap-2`}>
+                <PiWhatsappLogo aria-hidden="true" size={18} className="shrink-0 text-primary" />
+                {whatsappDisplay}
+                <span className="sr-only">(WhatsApp, opens in a new tab)</span>
+              </a>
+            </li>
+            <li>
+              <a href={emailUrl} className={`${linkClass} flex items-center gap-2 wrap-anywhere`}>
+                <PiEnvelopeSimple aria-hidden="true" size={18} className="shrink-0 text-primary" />
+                {SITE.email}
+              </a>
+            </li>
+          </ul>
+          <dl className="mt-4 flex flex-col gap-1.5 text-sm">
+            {SITE.hours.map((item) => (
+              <div key={item.day} className="flex justify-between gap-4">
+                <dt className="text-ink-muted">{item.day}</dt>
+                <dd className="font-medium tabular-nums text-ink">{item.time} WIB</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </div>
 
+      {/* metode bayar & kurir */}
       <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="flex flex-col gap-4 border-t border-base-300 py-6 md:flex-row md:items-center md:justify-between">
-          <p className="text-sm text-ink-muted">
-            © 2026 PT Pinkara Floral Studio Indonesia. All rights reserved.
+        <div className="flex flex-col gap-6 border-t border-base-300 py-6 sm:flex-row sm:gap-12">
+          <Logos label="Payment methods" items={PAYMENT_METHODS} />
+          <Logos label="Shipping partners" items={SHIPPING_PARTNERS} />
+        </div>
+      </div>
+
+      {/* legal */}
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <div className="flex flex-col gap-3 border-t border-base-300 py-6 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            {/* tahun ditulis tetap: new Date() di server component memicu error prerender (cacheComponents) */}
+            © 2026 {SITE.name}, {SITE.city}. All rights reserved.
           </p>
-          <nav aria-label="Legal links" className="flex flex-wrap gap-x-6 gap-y-2">
-            {LEGAL_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className={linkClass}>
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          <Link href="/privacy" className={linkClass}>
+            Privacy policy
+          </Link>
         </div>
       </div>
     </footer>
