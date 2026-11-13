@@ -8,22 +8,8 @@ import { OptionCard } from "@/features/(costumer)/checkout/components/optionCard
 import { getErrorMessage } from "@/lib/error.lib";
 import type { OrderDetail, VaBank } from "@/types/order.type";
 import { useCreatePayment, useSimulatePayment } from "../hooks/useOrder";
-
-const BANKS: { value: VaBank; label: string }[] = [
-  { value: "bca", label: "BCA" },
-  { value: "bni", label: "BNI" },
-  { value: "bri", label: "BRI" },
-  { value: "permata", label: "Permata" },
-];
-
-const bankLabel = (bank: VaBank | null) => BANKS.find((item) => item.value === bank)?.label ?? "Bank";
-
-function copyText(text: string, label: string) {
-  navigator.clipboard
-    .writeText(text)
-    .then(() => toast.success(`${label} copied`))
-    .catch(() => toast.error("Couldn't copy. Please copy it manually."));
-}
+import { BANKS, bankLabel, copyText } from "../utils/payment";
+import { SandboxTestPanel } from "./sandboxTestPanel";
 
 type Method = "QRIS" | "VIRTUAL_ACCOUNT";
 
@@ -175,6 +161,9 @@ export function PaymentPanel({ order }: { order: OrderDetail }) {
       <button type="button" onClick={() => setIsChanging(true)} className="btn btn-ghost btn-sm h-10 text-accent-text">
         Change payment method
       </button>
+
+      {/* kunci sandbox Midtrans: bayar lewat simulator Midtrans */}
+      {payment.sandbox && <SandboxTestPanel code={order.code} payment={payment} sandbox={payment.sandbox} />}
 
       {/* mode tes: tanpa MIDTRANS_SERVER_KEY, BE memakai gateway mock */}
       {payment.provider === "mock" && (

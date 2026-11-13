@@ -44,6 +44,8 @@ export type OrderPayment = {
   amount: number;
   expiresAt: string;
   paidAt: string | null;
+  // hanya dengan kunci sandbox Midtrans: link simulator untuk uji bayar tanpa uang sungguhan
+  sandbox: { simulatorUrl: string; qrImageUrl: string | null } | null;
 };
 
 // foto progres pesanan custom yang diunggah admin (PRD §8 no. 6)
