@@ -3,6 +3,26 @@
 import Image from "next/image";
 import { useRef, useState, type UIEvent } from "react";
 import { PiImageSquare, PiMagnifyingGlassPlus, PiX } from "react-icons/pi";
+import { photoCredit, UNSPLASH_URL } from "@/config/photoCredits";
+
+// kredit fotografer untuk foto Unsplash (wajib menurut aturan Unsplash); foto sendiri tidak menampilkan apa-apa
+function PhotoCreditLine({ src }: { src: string }) {
+  const credit = photoCredit(src);
+  if (!credit) return null;
+  const link = "underline underline-offset-2 hover:text-ink";
+  return (
+    <p className="text-xs text-ink-muted">
+      Photo by{" "}
+      <a href={credit.authorUrl} target="_blank" rel="noopener noreferrer" className={link}>
+        {credit.author}
+      </a>{" "}
+      on{" "}
+      <a href={UNSPLASH_URL} target="_blank" rel="noopener noreferrer" className={link}>
+        Unsplash
+      </a>
+    </p>
+  );
+}
 
 // galeri foto (PRD §6.3): geser di HP (scroll-snap), thumbnail untuk lompat ke foto, klik foto = perbesar
 export function ProductGallery({ images, name, badge }: { images: string[]; name: string; badge?: React.ReactNode }) {
@@ -75,6 +95,8 @@ export function ProductGallery({ images, name, badge }: { images: string[]; name
           </span>
         )}
       </div>
+
+      <PhotoCreditLine src={images[active] ?? images[0]} />
 
       {images.length > 1 && (
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
