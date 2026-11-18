@@ -16,12 +16,14 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   // foto dari luar yang boleh dipakai next/image:
   // Cloudinary (upload produk & foto profil), Google (foto profil akun login Google),
-  // placehold.co (foto dummy di data seed produk BE)
+  // placehold.co (foto dummy di data seed produk BE),
+  // Unsplash (foto produk sementara; aturan API Unsplash: ditampilkan langsung dari server mereka + kredit fotografer)
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "placehold.co" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
   turbopack: {
