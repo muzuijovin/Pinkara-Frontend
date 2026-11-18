@@ -130,3 +130,37 @@ body {
   --menu-active-bg: var(--color-accent-soft);
   --menu-active-fg: var(--color-accent-text);
 }
+
+/* bar pengumuman berjalan (AnnouncementBar). Dua salinan isi digeser -50% -> loop mulus.
+   Berhenti saat hover / fokus keyboard / tombol pause (WCAG 2.2.2), mati total untuk reduce motion */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee 45s linear infinite;
+}
+
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track,
+.marquee[data-paused="true"] .marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+  /* tanpa animasi: cukup satu salinan, bisa digeser manual */
+  .marquee {
+    overflow-x: auto;
+  }
+  .marquee-copy[aria-hidden="true"] {
+    display: none;
+  }
+}

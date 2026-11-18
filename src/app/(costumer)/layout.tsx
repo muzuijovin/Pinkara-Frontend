@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Footer from "@/components/layout/footer";
 import Navbar from "@/components/layout/navbar";
 import { SkipLink } from "@/components/layout/skipLink";
+import { AnnouncementBar } from "@/features/announcement/announcementBar";
 import { PageLoader } from "@/components/ui/pageLoader";
 import { RequireAuth } from "@/hoc/authGuard";
 
@@ -15,6 +16,7 @@ export default function CustomerLayout({
     <>
       <SkipLink />
       <Navbar />
+      <AnnouncementBar />
       <main id="main-content" className="flex-1">
         {/* RequireAuth pakai usePathname -> perlu Suspense karena cacheComponents aktif */}
         <Suspense fallback={<PageLoader />}>
